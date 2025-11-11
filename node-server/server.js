@@ -76,7 +76,7 @@ app.post('/routing', async (req, res) => {
                 [start_lng, start_lat],
                 [end_lng, end_lat]
             ],
-            "profile": "car",
+            "profile": "bike",
             "points_encoded": false,
             "instructions": true
         };

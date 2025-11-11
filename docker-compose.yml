@@ -33,6 +33,7 @@ services:
     command: --url https://download.geofabrik.de/europe/germany/nordrhein-westfalen/muenster-regbez-latest.osm.pbf --host 0.0.0.0
     volumes:
       - ./graphhopper/data:/data  # Persist the graph data
+      - ./graphhopper/config-example.yml:/graphhopper/config-example.yml  # Custom configuration
 
 volumes:
   pgadmin-data:
