@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>saafR</title>
+
+    <!-- Bootstrap links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#" data-page="landingpage">
+                <!-- Logo -->
+                <img src="pictures/logo.png" alt="Logo" class="me-2 rounded-circle"
+                    style="width: 40px; height: 40px;" />
+                <span>saafR</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-page="landingpage" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="routingpage" href="#">Routing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="addpage" href="#">Adding</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main id="content" class="container py-4">
+        <!-- Hier wird der Seiteninhalt eingefügt -->
+    </main>
+
+    <script>
+        // function to load a sub-page
+        function loadPage(pageName) {
+            const content = document.getElementById("content");
+            content.innerHTML = "<p>Load page...</p>";
+
+            // delete old script for subpage
+            const oldScript = document.getElementById("pageScript");
+            if (oldScript) oldScript.remove();
+
+            // load script for new subpage
+            const script = document.createElement("script");
+            script.src = pageName + ".js";
+            script.id = "pageScript";
+            document.body.appendChild(script);
+
+            // navbar active page refresh
+            document.querySelectorAll(".nav-link").forEach(link => {
+                if (link.getAttribute("data-page") === pageName) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        }
+
+        // clicking for navbar
+        document.addEventListener("click", (event) => {
+            const link = event.target.closest("[data-page]");
+            if (link) {
+                event.preventDefault();
+                const page = link.getAttribute("data-page");
+                loadPage(page);
+            }
+        });
+
+        // landing page default for loading
+        window.addEventListener("DOMContentLoaded", () => {
+            loadPage("landingpage");
+        });
+    </script>
+</body>
+
+</html>
