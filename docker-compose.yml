@@ -7,12 +7,23 @@ services:
       - "5432:5432"
     volumes:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
-      - ./postgis/import_osm.sh:/import_osm.sh
       - ./postgis/data:/var/lib/postgresql/data
 
-  adminer:
-    image: adminer
-    restart: always
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
     env_file: .env
     ports:
-      - 8080:8080
+      - 15080:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin/
+
+  node-server:
+    build: ./node-server
+    container_name: node-server
+    env_file: .env
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgadmin-data:

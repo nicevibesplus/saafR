@@ -1,0 +1,19 @@
+GET http://localhost:3000/anxiety_areas
+
+
+###
+
+POST http://localhost:3000/routing
+Content-Type: application/json
+
+{
+    "start": {
+        "lat": 51.953120,
+        "lng": 7.632357
+    },
+    "end": {
+        "lat": 51.956246,
+        "lng": 7.633648
+    },
+    "dodge_anxiety": true
+}
