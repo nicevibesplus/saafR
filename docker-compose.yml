@@ -25,5 +25,14 @@ services:
     ports:
       - "3000:3000"
 
+  graphhopper:
+    container_name: graphhopper
+    ports:
+      - 8989:8989
+    image: israelhikingmap/graphhopper
+    command: --url https://download.geofabrik.de/europe/germany/nordrhein-westfalen/muenster-regbez-latest.osm.pbf --host 0.0.0.0
+    volumes:
+      - ./graphhopper/data:/data  # Persist the graph data
+
 volumes:
   pgadmin-data:

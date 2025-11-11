@@ -26,6 +26,7 @@ pool.on('error', (err) => {
     process.exit(-1);
 });
 
+
 app.get('/anxiety_areas', (req, res) => {
     const query = `SELECT ST_AsText(geometry) FROM anxiety_areas`;
     pool.query(query, (err, result) => {
@@ -71,33 +72,46 @@ app.post('/routing', async (req, res) => {
         }
 
         const routingBody = {
-            "coordinates": [[start_lng, start_lat], [end_lng, end_lat]],
-            "profile": "cycling-regular",
-            "preference": "recommended",
-            "language": "en",
-            "geometry": true,
-            "options": {
-                "avoid_features": ["steps"],
-                "profile_params": {
-                    "weightings": {
-                        "green": 0.8,
-                        "quiet": 0.6
-                    }
-                }
-            }
+            "points": [
+                [start_lng, start_lat],
+                [end_lng, end_lat]
+            ],
+            "profile": "car",
+            "points_encoded": false,
+            "instructions": true
         };
 
         if (dodge_anxiety && anxiety_areas) {
             // Initialize areas object
-            routingBody.options.avoid_polygons = anxiety_areas
+            routingBody["ch.disable"] = true; // Disable contraction hierarchies for custom models
+            routingBody.custom_model = {
+                "priority": [
+                    {
+                        "if": "in_avoid_area",
+                        "multiply_by": "0.1"
+                    }
+                ],
+                "areas": {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "geometry": anxiety_areas,
+                            "properties": {},
+                            "id": "avoid_area"
+                        }
+                    ]
+                }
+            }
         }
 
-        const route = await fetch(`https://api.openrouteservice.org/v2/directions/cycling-regular/geojson`, {
+        console.log('Routing body:', JSON.stringify(routingBody, null, 2));
+
+        const route = await fetch(`http://graphhopper:8989/route?ch.disable=true`, {
             method: 'POST',
             body: JSON.stringify(routingBody),
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': OSR_API_KEY
+                'Content-Type': 'application/json'
             }
         });
 

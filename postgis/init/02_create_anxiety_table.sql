@@ -26,5 +26,5 @@ VALUES (
     'dark alley with poor lighting, junkies loitering',
     '20:00:00',
     '08:00:00',
-    ST_SetSRID(ST_MakePoint(7.633447, 51.955191), 4326)
+    ST_SetSRID(ST_MakePoint(7.632271,51.955101), 4326)
 );
