@@ -25,12 +25,20 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="#" data-page="landingpage">
-                <!-- Logo -->
-                <img src="pictures/saafR_logo.png" alt="Logo"
-                    style="height: 40px;" />
-                <span>saafR</span>
-            </a>
+                <!-- Navbar Logo -->
+                <a class="navbar-brand d-flex align-items-center" href="#" data-page="landingpage">
+                    <img id="navbar-logo" src="pictures/loading_saafR_logo.gif" alt="Logo" style="height: 40px;" />
+                    <span>saafR</span>
+                </a>
+                
+                <script>
+                setTimeout(() => {
+                    const logo = document.getElementById("navbar-logo");
+                    if (logo) {
+                        logo.src = "pictures/saafR_logo.png";
+                    }
+                }, 1000);
+                </script>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
