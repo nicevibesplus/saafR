@@ -124,6 +124,66 @@ app.post('/routing', async (req, res) => {
     }
 });
 
+app.post('/routing2', async (req, res) => {
+    try {
+        const { start, end, avoid_polygon = null } = req.body;
+        const { lat: start_lat, lng: start_lng } = start;
+        const { lat: end_lat, lng: end_lng } = end;
+
+        const routingBody = {
+            "points": [
+                [start_lng, start_lat],
+                [end_lng, end_lat]
+            ],
+            "profile": "bike",
+            "points_encoded": false,
+            "instructions": true
+        };
+
+        // If avoid_polygon is provided → use custom model
+        if (avoid_polygon) {
+            routingBody["ch.disable"] = true;
+            routingBody.custom_model = {
+                "priority": [
+                    {
+                        "if": "in_avoid_area",
+                        "multiply_by": 0.1
+                    }
+                ],
+                "areas": {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "id": "avoid_area",
+                            "type": "Feature",
+                            "properties": {},
+                            "geometry": avoid_polygon
+                        }
+                    ]
+                }
+            };
+        }
+
+        console.log('Routing3 body:', JSON.stringify(routingBody, null, 2));
+
+        const route = await fetch(`http://graphhopper:8989/route?ch.disable=true`, {
+            method: 'POST',
+            body: JSON.stringify(routingBody),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const answer = await route.json();
+        res.json(answer);
+
+    } catch (error) {
+        console.error('Error in routing3:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
+
 // Start server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
