@@ -4,6 +4,24 @@
    This script is loaded when user clicks "Routing" in navbar
    ======================================== */
 
+
+// ============================================
+// STEP 0: PREVENT DEFAULT MOBILE BEHAVIORS
+// ============================================
+// Prevent pull-to-refresh and overscroll
+document.body.style.overscrollBehavior = 'none';
+
+// Prevent double-tap zoom on the page (but allow on map)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+
 // ============================================
 // STEP 1: BUILD THE HTML CONTENT
 // ============================================
@@ -442,9 +460,23 @@ function setupLayerToggles() {
     }
 }
 
-// Why separate event listeners instead of one?
-// Each toggle controls a different layer, so we need to know which one was clicked.
-// We could use a single listener with event delegation, but this is clearer.
+
+
+// ===== MAP TOUCH OPTIMIZATION - Add right after map creation =====
+// Get the map container element
+const mapElement = document.getElementById('map');
+
+// Improve touch handling specifically for the map
+if (mapElement) {
+    mapElement.style.touchAction = 'pan-x pan-y';
+    
+    // Prevent accidental page actions while interacting with map
+    mapElement.addEventListener('touchstart', function(e) {
+        // Allow map panning even with multiple touches
+        e.stopPropagation();
+    }, { passive: true });
+}
+
 
 
 // ============================================
