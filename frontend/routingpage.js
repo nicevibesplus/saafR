@@ -415,7 +415,7 @@ function loadAnxietyZones() {
                         let popupContent = '<div class="popup-content">';
                         popupContent += '<h6>Anxiety Zone</h6>';
                         
-                        // ⚠️ Replace with your actual property names
+                        // Replace with your actual property names
                         if (feature.properties.name) {
                             popupContent += '<p><strong>Area:</strong> ' + feature.properties.name + '</p>';
                         }
