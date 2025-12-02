@@ -8,6 +8,7 @@ services:
     volumes:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
       - ./postgis/data:/var/lib/postgresql/data
+      - ./postgis/crash:/crash:ro
 
   pgadmin:
     image: dpage/pgadmin4
