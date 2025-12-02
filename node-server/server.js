@@ -51,11 +51,28 @@ app.get('/anxiety_areas', (req, res) => {
 });
 
 app.get('/get_edges_with_accidents', async (req, res) => {
-    const query = `SELECT s.osm_id, s.geom, count(*)
-                    from crashes c, streets s
-                    WHERE c.osm_id = s.osm_id
-                    group by s.osm_id, s.geom
-                    order by count(*) DESC`;
+    const query = `SELECT jsonb_build_object(
+    'type', 'FeatureCollection',
+    'features', jsonb_agg(
+        jsonb_build_object(
+            'type', 'Feature',
+            'geometry', ST_AsGeoJSON(row.geom)::jsonb,
+            'properties', to_jsonb(row) - 'geom'
+        )
+    )
+    ) AS featurecollection
+    FROM (
+        SELECT 
+            s.osm_id, 
+            s.geom, 
+            COUNT(c.osm_id) AS crash_count
+        FROM streets s
+        LEFT JOIN crashes c 
+            ON s.osm_id = c.osm_id
+        GROUP BY s.osm_id, s.geom
+        ORDER BY crash_count DESC
+    ) row;`;
+     
     pool.query(query, (err, result) => {
         if (err) {
             console.error('Error executing query', err);
