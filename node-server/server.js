@@ -26,6 +26,17 @@ pool.on('error', (err) => {
     process.exit(-1);
 });
 
+app.get('/streets', (req, res) => {
+    const query = `SELECT geom FROM streets`;
+    pool.query(query, (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(result.rows);
+        }
+    });
+});
 
 app.get('/anxiety_areas', (req, res) => {
     const query = `SELECT ST_AsText(geometry) FROM anxiety_areas`;

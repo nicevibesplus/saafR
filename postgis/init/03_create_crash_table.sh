@@ -8,4 +8,5 @@ ogr2ogr -f "PostgreSQL" \
   /crash/CrashDataWithOSMID.shp \
   -nln public.crashes \
   -lco GEOMETRY_NAME=geom \
-  -nlt PROMOTE_TO_MULTI
+  -nlt PROMOTE_TO_MULTI \
+  --config SHAPE_ENCODING "CP1252"

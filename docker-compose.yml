@@ -7,8 +7,9 @@ services:
       - "5432:5432"
     volumes:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
-      - ./postgis/data:/var/lib/postgresql/data
+      #- ./postgis/data:/var/lib/postgresql/data
       - ./postgis/crash:/crash:ro
+      - ./postgis/streets:/streets:ro
 
   pgadmin:
     image: dpage/pgadmin4
