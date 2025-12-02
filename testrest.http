@@ -3,6 +3,10 @@ GET http://localhost:3000/anxiety_areas
 
 ###
 
+GET http://localhost:3000/get_edges_with_accidents
+
+###
+
 POST http://localhost:3000/routing
 Content-Type: application/json
 
