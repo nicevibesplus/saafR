@@ -50,6 +50,23 @@ app.get('/anxiety_areas', (req, res) => {
     });
 });
 
+app.get('/get_edges_with_accidents', async (req, res) => {
+    const query = `SELECT s.osm_id, s.geom, count(*)
+                    from crashes c, streets s
+                    WHERE c.osm_id = s.osm_id
+                    group by s.osm_id, s.geom
+                    order by count(*) DESC`;
+    pool.query(query, (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(result.rows);
+        }
+    });
+});
+
+
 app.post('/routing', async (req, res) => {
     try {
         // req.body is already parsed - don't use JSON.parse()
