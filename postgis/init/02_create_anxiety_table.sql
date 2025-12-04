@@ -4,6 +4,7 @@ CREATE TABLE anxiety_areas (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     reason TEXT,
+    approved BOOLEAN DEFAULT FALSE,
     start_time TIME,
     end_time TIME,
     geometry GEOMETRY(GEOMETRY, 4326)
@@ -19,12 +20,3 @@ ON anxiety_areas(start_time);
 
 CREATE INDEX idx_anxiety_areas_end_time 
 ON anxiety_areas(end_time);
-
-INSERT INTO anxiety_areas (name, reason, start_time, end_time, geometry)
-VALUES (
-    'Bahnhofstraße',
-    'dark alley with poor lighting, junkies loitering',
-    '20:00:00',
-    '08:00:00',
-    ST_SetSRID(ST_MakePoint(7.632271,51.955101), 4326)
-);
