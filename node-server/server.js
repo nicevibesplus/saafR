@@ -50,6 +50,40 @@ app.get('/anxiety_areas', (req, res) => {
     });
 });
 
+app.get('/get_edges_with_accidents', async (req, res) => {
+    const query = `SELECT jsonb_build_object(
+    'type', 'FeatureCollection',
+    'features', jsonb_agg(
+        jsonb_build_object(
+            'type', 'Feature',
+            'geometry', ST_AsGeoJSON(row.geom)::jsonb,
+            'properties', to_jsonb(row) - 'geom'
+        )
+    )
+    ) AS featurecollection
+    FROM (
+        SELECT 
+            s.osm_id, 
+            s.geom, 
+            COUNT(c.osm_id) AS crash_count
+        FROM streets s
+        LEFT JOIN crashes c 
+            ON s.osm_id = c.osm_id
+        GROUP BY s.osm_id, s.geom
+        ORDER BY crash_count DESC
+    ) row;`;
+     
+    pool.query(query, (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(result.rows);
+        }
+    });
+});
+
+
 app.post('/routing', async (req, res) => {
     try {
         // req.body is already parsed - don't use JSON.parse()
