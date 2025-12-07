@@ -41,8 +41,10 @@
     <styleParameterFilter>
       <key>STYLES</key>
       <defaultValue></defaultValue>
-      <availableStyles class="sorted-set"/>
-      <defaultStyle>ne:boundary_lines</defaultStyle>
+      <availableStyles class="sorted-set">
+        <string>streets</string>
+      </availableStyles>
+      <defaultStyle>streets</defaultStyle>
     </styleParameterFilter>
   </parameterFilters>
   <gutter>0</gutter>
