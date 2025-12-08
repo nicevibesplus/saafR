@@ -9,17 +9,26 @@
 // STEP 0: PREVENT DEFAULT MOBILE BEHAVIORS
 // ============================================
 // Prevent pull-to-refresh and overscroll
-document.body.style.overscrollBehavior = 'none';
+// ============================================
+// STEP 0: PREVENT DEFAULT MOBILE BEHAVIORS (SAFE MULTI-LOAD)
+// ============================================
 
-// Prevent double-tap zoom on the page (but allow on map)
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
+if (typeof window.saafrTouchInit === 'undefined') {
+
+    document.body.style.overscrollBehavior = 'none';
+
+    window.saafrLastTouchEnd = 0;
+
+    document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - window.saafrLastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        window.saafrLastTouchEnd = now;
+    }, false);
+
+    window.saafrTouchInit = true;
+}
 
 
 // ============================================
@@ -174,13 +183,11 @@ document.addEventListener('touchend', function(e) {
 // ============================================
 
 // These variables store our map and layers so we can access them from any function
-let map;  // The Leaflet map instance
-
-// Layer groups object - stores references to each data layer
-let layerGroups = {
-    accidents: null,      // Will hold the accidents layer
-    roadNetwork: null,    // Will hold the road network layer
-    anxietyZones: null    // Will hold the anxiety zones layer
+var map;
+var layerGroups = layerGroups || {
+    accidents: null,
+    roadNetwork: null,
+    anxietyZones: null
 };
 
 
@@ -464,7 +471,7 @@ function setupLayerToggles() {
 
 // ===== MAP TOUCH OPTIMIZATION - Add right after map creation =====
 // Get the map container element
-const mapElement = document.getElementById('map');
+var mapElement = document.getElementById('map');
 
 // Improve touch handling specifically for the map
 if (mapElement) {
