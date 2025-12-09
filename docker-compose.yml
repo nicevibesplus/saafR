@@ -9,7 +9,7 @@ services:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
       #- ./postgis/data:/var/lib/postgresql/data
       - ./postgis/crash:/crash:ro
-      - ./postgis/streets:/streets:ro
+      - ./postgis/streets:/streets:rw
 
   pgadmin:
     image: dpage/pgadmin4
