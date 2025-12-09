@@ -7,6 +7,15 @@ const OSR_API_KEY = process.env.OSR_API_KEY;
 
 app.use(express.json());
 
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// SPA fallback (serve index.html for all unknown GET requests)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
 // PostgreSQL/PostGIS connection pool
 const pool = new Pool({
     host: process.env.POSTGRES_SERVER || 'localhost',
