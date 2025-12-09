@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Local PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgis",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "admin",
+      "SSLMode": "prefer",
+      "DBRestriction": null,
+      "Comment": "Auto-created on container init"
+    }
+  }
+}
