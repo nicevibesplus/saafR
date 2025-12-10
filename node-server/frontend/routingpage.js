@@ -92,7 +92,7 @@ document.addEventListener('touchend', function(e) {
             <!-- Routing Modal -->
             <div class="modal fade" id="routingModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
+                    <div class="modal-content" id = "routeCalculation">
                         <div class="modal-header">
                             <h5 class="modal-title">Route Calculation</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -124,7 +124,7 @@ document.addEventListener('touchend', function(e) {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary">Calculate Route</button>
+                            <button type="button" id = "routeBtn" class="btn btn-primary">Calculate Route</button>
                         </div>
                     </div>
                 </div>
@@ -565,6 +565,53 @@ document.addEventListener('show.bs.modal', function(event) {
         updateRoutingModalStatus();
     }
 });
+
+
+/*
+Hier wird die Route berechnet und auf der Karte angezeigt, wenn man auf den Calculate Route Button klickt.
+TODO:
+- Start- und Endpunkt dynamisch aus den Eingabefeldern holen
+*/
+let routeLayer = null;
+document.getElementById("routeBtn").addEventListener("click", () => {
+        fetch("http://localhost:3000/routing2", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                start: { lat: 51.95592733851593, lng: 7.62645680767258 },
+                end: { lat: 51.96947351074274, lng: 7.5956409639675355 }
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response:", data);
+
+             const path = data.paths[0];
+
+            // Extract the coordinates from GraphHopper GeoJSON
+            const coords = path.points.coordinates.map(c => [c[1], c[0]]);
+            // GraphHopper = [lng, lat], Leaflet = [lat, lng]
+
+            // Remove previous route
+            if (routeLayer) {
+                map.removeLayer(routeLayer);
+            }
+
+            // Draw polyline
+            routeLayer = L.polyline(coords, { weight: 5 }).addTo(map);
+
+            bootstrap.Modal.getInstance(document.getElementById('routingModal')).hide();
+
+            // Zoom to route
+            map.fitBounds(routeLayer.getBounds());
+
+        })
+        .catch(err => {
+            console.error("Error:", err);
+        });
+        });
 
 
 // ============================================
