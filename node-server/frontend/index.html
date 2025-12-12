@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>saafR</title>
+
+    <!-- Bootstrap links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- MapCSS -->
+    <link rel="stylesheet" href="css/map-style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+                <!-- Navbar Logo -->
+                <a class="navbar-brand d-flex align-items-center" href="#" data-page="routingpage">
+                    <img id="navbar-logo" src="pictures/loading_saafR_logo.gif" alt="Logo" style="height: 40px;" />
+                </a>
+                
+                <script>
+                setTimeout(() => {
+                    const logo = document.getElementById("navbar-logo");
+                    if (logo) {
+                        logo.src = "pictures/saafR_logo.png";
+                    }
+                }, 1000);
+                </script>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-page="routingpage" href="#">Routing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="addpage" href="#">Adding</a>
+                    </li>
+                                        <li class="nav-item">
+                        <a class="nav-link" data-page="aboutpage" href="#">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main id="content" class="container py-4">
+        <!-- page content gets displayed here -->
+    </main>
+
+    <script>
+        // function to load a sub-page
+        function loadPage(pageName) {
+            const content = document.getElementById("content");
+            content.innerHTML = "<p>Load page...</p>";
+
+            // delete old script for subpage
+            const oldScript = document.getElementById("pageScript");
+            if (oldScript) oldScript.remove();
+
+            // load script for new subpage
+            const script = document.createElement("script");
+            script.src = pageName + ".js";
+            script.id = "pageScript";
+            document.body.appendChild(script);
+
+            // navbar active page refresh
+            document.querySelectorAll(".nav-link").forEach(link => {
+                if (link.getAttribute("data-page") === pageName) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        }
+
+        // clicking for navbar
+        document.addEventListener("click", (event) => {
+            const link = event.target.closest("[data-page]");
+            if (link) {
+                event.preventDefault();
+                const page = link.getAttribute("data-page");
+                loadPage(page);
+
+                // Close the navbar collapse on mobile
+                const navbarCollapse = document.getElementById('navbarNav');
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                } else {
+                    // If no instance exists, create one and hide it
+                    new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+                }
+            }
+        });
+
+        // landing page default for loading
+        window.addEventListener("DOMContentLoaded", () => {
+            loadPage("routingpage");
+        });
+    </script>
+</body>
+
+</html>

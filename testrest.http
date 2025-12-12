@@ -1,0 +1,72 @@
+GET http://localhost:3000/anxiety_areas
+
+
+###
+
+GET http://localhost:3000/get_edges_with_accidents
+
+###
+
+POST http://localhost:3000/routing
+Content-Type: application/json
+
+{
+    "start": {
+        "lat": 51.953120,
+        "lng": 7.632357
+    },
+    "end": {
+        "lat": 51.956246,
+        "lng": 7.633648
+    },
+    "dodge_anxiety": true
+}
+
+###
+POST http://localhost:3000/routing2
+Content-Type: application/json
+
+{
+    "start": { "lat": 51.95592733851593, "lng": 7.62645680767258 },
+    "end": { "lat": 51.96947351074274, "lng": 7.5956409639675355 }
+}
+
+
+
+###
+
+POST http://localhost:3000/routing2
+Content-Type: application/json
+
+{
+    "start": { "lat": 51.95592733851593, "lng": 7.62645680767258 },
+    "end": { "lat": 51.96947351074274, "lng": 7.5956409639675355 },
+    "avoid_polygon": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [
+              7.616680085402379,
+              51.96427593536143
+            ],
+            [
+              7.616680085402379,
+              51.95972085149435
+            ],
+            [
+              7.61924963921669,
+              51.95972085149435
+            ],
+            [
+              7.61924963921669,
+              51.96427593536143
+            ],
+            [
+              7.616680085402379,
+              51.96427593536143
+            ]
+            ]
+        ]
+    }
+}
+
