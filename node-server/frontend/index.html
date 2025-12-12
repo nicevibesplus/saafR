@@ -65,28 +65,44 @@
     <script>
         // function to load a sub-page
         function loadPage(pageName) {
-            const content = document.getElementById("content");
-            content.innerHTML = "<p>Load page...</p>";
+    const content = document.getElementById("content");
+    content.innerHTML = "<p>Load page...</p>";
 
-            // delete old script for subpage
-            const oldScript = document.getElementById("pageScript");
-            if (oldScript) oldScript.remove();
+    // alte Subpage aufräumen, falls vorhanden
+    if (window.unmountPage && typeof window.unmountPage === "function") {
+        window.unmountPage();
+    }
 
-            // load script for new subpage
-            const script = document.createElement("script");
-            script.src = pageName + ".js";
-            script.id = "pageScript";
-            document.body.appendChild(script);
+    delete window.renderPage;
+    delete window.unmountPage;
 
-            // navbar active page refresh
-            document.querySelectorAll(".nav-link").forEach(link => {
-                if (link.getAttribute("data-page") === pageName) {
-                    link.classList.add("active");
-                } else {
-                    link.classList.remove("active");
-                }
-            });
+    // altes Script entfernen
+    const oldScript = document.getElementById("pageScript");
+    if (oldScript && oldScript.parentNode) {
+        oldScript.parentNode.removeChild(oldScript);
+    }
+
+    // neues Script laden
+    const script = document.createElement("script");
+    script.src = pageName + ".js";
+    script.id = "pageScript";
+
+    // Wenn renderPage existiert → automatisch aufrufen
+    script.onload = () => {
+        if (window.renderPage && typeof window.renderPage === "function") {
+            window.renderPage(content);
         }
+        // sonst: das Script läuft wie gewohnt, ohne renderPage
+    };
+
+    document.body.appendChild(script);
+
+    // Navbar Active-State aktualisieren
+    document.querySelectorAll(".nav-link").forEach(link => {
+        link.classList.toggle("active", link.getAttribute("data-page") === pageName);
+    });
+}
+
 
         // clicking for navbar
         document.addEventListener("click", (event) => {
