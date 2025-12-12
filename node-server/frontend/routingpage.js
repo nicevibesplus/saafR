@@ -9,17 +9,26 @@
 // STEP 0: PREVENT DEFAULT MOBILE BEHAVIORS
 // ============================================
 // Prevent pull-to-refresh and overscroll
-document.body.style.overscrollBehavior = 'none';
+// ============================================
+// STEP 0: PREVENT DEFAULT MOBILE BEHAVIORS (SAFE MULTI-LOAD)
+// ============================================
 
-// Prevent double-tap zoom on the page (but allow on map)
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
+if (typeof window.saafrTouchInit === 'undefined') {
+
+    document.body.style.overscrollBehavior = 'none';
+
+    window.saafrLastTouchEnd = 0;
+
+    document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - window.saafrLastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        window.saafrLastTouchEnd = now;
+    }, false);
+
+    window.saafrTouchInit = true;
+}
 
 
 // ============================================
@@ -92,7 +101,7 @@ document.addEventListener('touchend', function(e) {
             <!-- Routing Modal -->
             <div class="modal fade" id="routingModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content" id = "routeCalculation">
+                    <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Route Calculation</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -124,7 +133,7 @@ document.addEventListener('touchend', function(e) {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" id = "routeBtn" class="btn btn-primary">Calculate Route</button>
+                            <button type="button" class="btn btn-primary">Calculate Route</button>
                         </div>
                     </div>
                 </div>
@@ -174,13 +183,11 @@ document.addEventListener('touchend', function(e) {
 // ============================================
 
 // These variables store our map and layers so we can access them from any function
-let map;  // The Leaflet map instance
-
-// Layer groups object - stores references to each data layer
-let layerGroups = {
-    accidents: null,      // Will hold the accidents layer
-    roadNetwork: null,    // Will hold the road network layer
-    anxietyZones: null    // Will hold the anxiety zones layer
+var map;
+var layerGroups = layerGroups || {
+    accidents: null,
+    roadNetwork: null,
+    anxietyZones: null
 };
 
 
@@ -464,7 +471,7 @@ function setupLayerToggles() {
 
 // ===== MAP TOUCH OPTIMIZATION - Add right after map creation =====
 // Get the map container element
-const mapElement = document.getElementById('map');
+var mapElement = document.getElementById('map');
 
 // Improve touch handling specifically for the map
 if (mapElement) {
@@ -565,53 +572,6 @@ document.addEventListener('show.bs.modal', function(event) {
         updateRoutingModalStatus();
     }
 });
-
-
-/*
-Hier wird die Route berechnet und auf der Karte angezeigt, wenn man auf den Calculate Route Button klickt.
-TODO:
-- Start- und Endpunkt dynamisch aus den Eingabefeldern holen
-*/
-let routeLayer = null;
-document.getElementById("routeBtn").addEventListener("click", () => {
-        fetch("http://localhost:3000/routing2", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                start: { lat: 51.95592733851593, lng: 7.62645680767258 },
-                end: { lat: 51.96947351074274, lng: 7.5956409639675355 }
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Response:", data);
-
-             const path = data.paths[0];
-
-            // Extract the coordinates from GraphHopper GeoJSON
-            const coords = path.points.coordinates.map(c => [c[1], c[0]]);
-            // GraphHopper = [lng, lat], Leaflet = [lat, lng]
-
-            // Remove previous route
-            if (routeLayer) {
-                map.removeLayer(routeLayer);
-            }
-
-            // Draw polyline
-            routeLayer = L.polyline(coords, { weight: 5 }).addTo(map);
-
-            bootstrap.Modal.getInstance(document.getElementById('routingModal')).hide();
-
-            // Zoom to route
-            map.fitBounds(routeLayer.getBounds());
-
-        })
-        .catch(err => {
-            console.error("Error:", err);
-        });
-        });
 
 
 // ============================================

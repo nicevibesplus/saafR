@@ -26,9 +26,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
                 <!-- Navbar Logo -->
-                <a class="navbar-brand d-flex align-items-center" href="#" data-page="landingpage">
+                <a class="navbar-brand d-flex align-items-center" href="#" data-page="routingpage">
                     <img id="navbar-logo" src="pictures/loading_saafR_logo.gif" alt="Logo" style="height: 40px;" />
-                    <span>saafR</span>
                 </a>
                 
                 <script>
@@ -46,13 +45,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" data-page="landingpage" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-page="routingpage" href="#">Routing</a>
+                        <a class="nav-link active" data-page="routingpage" href="#">Routing</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-page="addpage" href="#">Adding</a>
+                    </li>
+                                        <li class="nav-item">
+                        <a class="nav-link" data-page="aboutpage" href="#">About</a>
                     </li>
                 </ul>
             </div>
@@ -111,7 +110,7 @@
 
         // landing page default for loading
         window.addEventListener("DOMContentLoaded", () => {
-            loadPage("landingpage");
+            loadPage("routingpage");
         });
     </script>
 </body>
