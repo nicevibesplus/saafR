@@ -1,3 +1,9 @@
+/*
+Prevents unwanted mobile browser behaviors such as pull-to-refresh 
+and double-tap zoom to keep map interactions stable on touch devices.
+*/
+
+
 (function () {
     window.saafr = window.saafr || {};
     window.saafr.ui = window.saafr.ui || {};

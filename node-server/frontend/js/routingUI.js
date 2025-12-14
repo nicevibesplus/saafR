@@ -1,3 +1,11 @@
+/*
+This module initializes the routing user interface
+
+It handles the click on the route button, reads start and destination inputs,
+converts them to coords, requests a route from the backend,
+drwas resulting route on the maps, closes routing modal 
+and zooms to the calculated route
+*/
 (function () {
     window.saafr = window.saafr || {};
     window.saafr.routing = window.saafr.routing || {};
@@ -24,7 +32,7 @@
             const end = parse(endText) || await geocode(endText);
 
             if (!start || !end) {
-                alert("Start oder Ziel konnten nicht gefunden werden. Nutzen Sie lat,lng oder eine Adresse wie Prinzipalmarkt 10 Münster.");
+                alert("Start or destination could not be found. Use lat, lng, or an address such as Prinzipalmarkt 10 Münster.");
                 return;
             }
 

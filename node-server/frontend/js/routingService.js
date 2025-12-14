@@ -1,3 +1,13 @@
+/*
+ Provides helper functions for routing tasks.
+
+ Includes utilities to parse latitude longitude input strings,
+ geocode textual addresses into geographic coordinates using the
+ OpenStreetMap Nominatim service, and request a route from the local
+ routing backend API. All functions are exposed via the
+ window.saafr.routing namespace for reuse across the application.
+*/
+
 (function () {
     window.saafr = window.saafr || {};
     window.saafr.routing = window.saafr.routing || {};

@@ -1,4 +1,5 @@
-let routingStore = null;
+window.routingStore = null;
+window._saafrRoutingModalListener = window._saafrRoutingModalListener || null;
 
 window.renderPage = async function () {
     const content = document.getElementById("content");
@@ -18,9 +19,9 @@ window.renderPage = async function () {
     bootstrap.Modal.getOrCreateInstance(layerModalEl).show();
 
     window.saafr.ui.initMobileGuards();
-    routingStore = window.saafr.state.createStore();
+    window.routingStore = window.saafr.state.createStore();
 
-    window.saafr.map.createMap("map", [51.9607, 7.6261], 13, routingStore);
+    window.saafr.map.createMap("map", [51.9607, 7.6261], 13, window.routingStore);
 
     const saved = localStorage.getItem("saafrDarkMode");
     const initialDark = saved === "1";
@@ -28,47 +29,62 @@ window.renderPage = async function () {
 
     if (switchEl) {
         switchEl.checked = initialDark;
-        window.saafr.map.setBasemap(routingStore, initialDark);
+        window.saafr.map.setBasemap(window.routingStore, initialDark);
         switchEl.addEventListener("change", function () {
-            window.saafr.map.setBasemap(routingStore, this.checked);
+            window.saafr.map.setBasemap(window.routingStore, this.checked);
         });
     }
 
-    routingStore.layers.accidents =
+    window.routingStore.layers.accidents =
         await window.saafr.layers.createAccidentsLayer("test_data/munster_2020_2024_utm.geojson");
 
-    if (routingStore.map.getZoom() >= 13) {
-        routingStore.map.addLayer(routingStore.layers.accidents);
+    if (window.routingStore.map.getZoom() >= 13) {
+        window.routingStore.map.addLayer(window.routingStore.layers.accidents);
     }
 
-    window.saafr.map.initZoomVisibility(routingStore, 13);
-    window.saafr.map.initLayerToggles(routingStore);
-    window.saafr.routing.initRoutingUI(routingStore);
+    window.saafr.map.initZoomVisibility(window.routingStore, 13);
+    window.saafr.map.initLayerToggles(window.routingStore);
+    window.saafr.routing.initRoutingUI(window.routingStore);
 
-    document.addEventListener("show.bs.modal", function (event) {
-        if (event.target && event.target.id === "routingModal") {
-            window.saafr.map.updateRoutingModalStatus(routingStore);
-        }
-    });
+    if (!window._saafrRoutingModalListener) {
+        window._saafrRoutingModalListener = function (event) {
+            if (event.target && event.target.id === "routingModal") {
+                if (window.routingStore) {
+                    window.saafr.map.updateRoutingModalStatus(window.routingStore);
+                }
+            }
+        };
+        document.addEventListener("show.bs.modal", window._saafrRoutingModalListener);
+    }
 };
 
 window.unmountPage = function () {
     const layerModalEl = document.getElementById("layerModal");
     if (layerModalEl) {
         const inst = bootstrap.Modal.getInstance(layerModalEl);
-        if (inst) inst.dispose();
+        if (inst) {
+            inst.hide();
+            inst.dispose();
+        }
     }
 
     const routingModalEl = document.getElementById("routingModal");
     if (routingModalEl) {
         const inst = bootstrap.Modal.getInstance(routingModalEl);
-        if (inst) inst.dispose();
+        if (inst) {
+            inst.hide();
+            inst.dispose();
+        }
     }
 
-    if (routingStore && routingStore.map) {
-        routingStore.map.remove();
-        routingStore.map = null;
+    document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+    document.body.classList.remove("modal-open");
+    document.body.style.removeProperty("padding-right");
+
+    if (window.routingStore && window.routingStore.map) {
+        window.routingStore.map.remove();
+        window.routingStore.map = null;
     }
 
-    routingStore = null;
+    window.routingStore = null;
 };

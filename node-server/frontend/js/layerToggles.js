@@ -1,3 +1,13 @@
+/*
+ This module manages layer visibility on the map.
+
+ It allows map layers to be turned on or off based on user input,
+ connects checkbox toggles to specific map layers, and keeps the
+ routing modal in sync with the current layer state. The module
+ also controls zoom-dependent visibility, showing or hiding layers
+ automatically when the map zoom level crosses a defined threshold.
+*/
+
 (function () {
     window.saafr = window.saafr || {};
     window.saafr.map = window.saafr.map || {};

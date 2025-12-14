@@ -1,4 +1,13 @@
-(function () {
+/**
+Creates and returns a Leaflet GeoJSON layer for accident point data.
+ 
+ The function fetches a GeoJSON file from the given URL and converts each feature
+ into a styled circle marker using WGS84 coordinates. For every accident point,
+ a popup is attached that displays basic information such as year, month,
+ and accident category.
+ */
+(
+    function () {
     window.saafr = window.saafr || {};
     window.saafr.layers = window.saafr.layers || {};
 

@@ -1,3 +1,13 @@
+/*
+Initialites and manages the leaflet map
+
+* Create a new map instanve
+* removes any existing map to avoid duplicates
+* sets basemaps
+* touch behaviour is optimized for mobile devices
+* switch between maps
+
+*/
 (function () {
     window.saafr = window.saafr || {};
     window.saafr.map = window.saafr.map || {};

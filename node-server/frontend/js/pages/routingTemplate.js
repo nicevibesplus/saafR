@@ -18,7 +18,6 @@
 
                     <div class="form-check form-switch theme-switch">
                         <input class="form-check-input" type="checkbox" id="darkModeSwitch">
-                        <label class="form-check-label" for="darkModeSwitch">Dark</label>
                     </div>
                 </div>
 
@@ -70,11 +69,11 @@
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label class="form-label">Starting Point</label>
-                                    <input id="startInput" type="text" class="form-control" placeholder="lat,lng">
+                                    <input id="startInput" type="text" class="form-control" placeholder="Insert start address or lat,lng">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Destination</label>
-                                    <input id="endInput" type="text" class="form-control" placeholder="lat,lng">
+                                    <input id="endInput" type="text" class="form-control" placeholder="Insert destination address or lat,lng">
                                 </div>
 
                                 <div class="route-considerations mt-4">

@@ -78,6 +78,17 @@
     
 <!-- Page loader -->
     <script>
+        function closeAllModals() {
+            document.querySelectorAll(".modal.show").forEach(m => {
+                const inst = bootstrap.Modal.getInstance(m);
+                if (inst) inst.hide();
+            });
+
+            document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+            document.body.classList.remove("modal-open");
+            document.body.style.removeProperty("padding-right");
+        }
+
         function loadPage(pageName) {
             const content = document.getElementById("content");
             content.innerHTML = "<p>Load page...</p>";
@@ -106,15 +117,21 @@
 
             document.body.appendChild(script);
 
+            
+
             document.querySelectorAll(".nav-link").forEach(link => {
                 link.classList.toggle("active", link.getAttribute("data-page") === pageName);
             });
         }
 
+
         document.addEventListener("click", (event) => {
             const link = event.target.closest("[data-page]");
             if (link) {
                 event.preventDefault();
+
+                closeAllModals();
+
                 const page = link.getAttribute("data-page");
                 loadPage(page);
 
@@ -128,9 +145,11 @@
             }
         });
 
+
         window.addEventListener("DOMContentLoaded", () => {
             loadPage("routingpage");
         });
     </script>
 
+</body>
 </html>
