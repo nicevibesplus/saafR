@@ -9,7 +9,7 @@
     <!-- Bootstrap links -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -62,49 +62,55 @@
         <!-- page content gets displayed here -->
     </main>
 
+    <!-- SaafR shared modules -->
+    <script src="js/store.js"></script>
+    <script src="js/mobileGuard.js"></script>
+
+    <script src="js/mapInit.js"></script>
+    <script src="js/accidentsLayer.js"></script>
+    <script src="js/layerToggles.js"></script>
+
+    <script src="js/routingService.js"></script>
+    <script src="js/routingUI.js"></script>
+
+    <script src="js/pages/routingTemplate.js"></script>
+
+    
+<!-- Page loader -->
     <script>
-        // function to load a sub-page
         function loadPage(pageName) {
-    const content = document.getElementById("content");
-    content.innerHTML = "<p>Load page...</p>";
+            const content = document.getElementById("content");
+            content.innerHTML = "<p>Load page...</p>";
 
-    // alte Subpage aufräumen, falls vorhanden
-    if (window.unmountPage && typeof window.unmountPage === "function") {
-        window.unmountPage();
-    }
+            if (window.unmountPage && typeof window.unmountPage === "function") {
+                window.unmountPage();
+            }
 
-    delete window.renderPage;
-    delete window.unmountPage;
+            delete window.renderPage;
+            delete window.unmountPage;
 
-    // altes Script entfernen
-    const oldScript = document.getElementById("pageScript");
-    if (oldScript && oldScript.parentNode) {
-        oldScript.parentNode.removeChild(oldScript);
-    }
+            const oldScript = document.getElementById("pageScript");
+            if (oldScript && oldScript.parentNode) {
+                oldScript.parentNode.removeChild(oldScript);
+            }
 
-    // neues Script laden
-    const script = document.createElement("script");
-    script.src = pageName + ".js";
-    script.id = "pageScript";
+            const script = document.createElement("script");
+            script.src = pageName + ".js";
+            script.id = "pageScript";
 
-    // Wenn renderPage existiert → automatisch aufrufen
-    script.onload = () => {
-        if (window.renderPage && typeof window.renderPage === "function") {
-            window.renderPage(content);
+            script.onload = () => {
+                if (window.renderPage && typeof window.renderPage === "function") {
+                    window.renderPage(content);
+                }
+            };
+
+            document.body.appendChild(script);
+
+            document.querySelectorAll(".nav-link").forEach(link => {
+                link.classList.toggle("active", link.getAttribute("data-page") === pageName);
+            });
         }
-        // sonst: das Script läuft wie gewohnt, ohne renderPage
-    };
 
-    document.body.appendChild(script);
-
-    // Navbar Active-State aktualisieren
-    document.querySelectorAll(".nav-link").forEach(link => {
-        link.classList.toggle("active", link.getAttribute("data-page") === pageName);
-    });
-}
-
-
-        // clicking for navbar
         document.addEventListener("click", (event) => {
             const link = event.target.closest("[data-page]");
             if (link) {
@@ -112,23 +118,19 @@
                 const page = link.getAttribute("data-page");
                 loadPage(page);
 
-                // Close the navbar collapse on mobile
-                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarCollapse = document.getElementById("navbarNav");
                 const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
                 if (bsCollapse) {
                     bsCollapse.hide();
                 } else {
-                    // If no instance exists, create one and hide it
                     new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
                 }
             }
         });
 
-        // landing page default for loading
         window.addEventListener("DOMContentLoaded", () => {
             loadPage("routingpage");
         });
     </script>
-</body>
 
 </html>
