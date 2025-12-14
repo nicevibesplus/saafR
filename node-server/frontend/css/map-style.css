@@ -298,3 +298,16 @@ body {
 #layerModal .modal-footer .btn-primary:active {
     transform: translateY(0);
 }
+
+.theme-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+}
+
+
+
+.theme-switch .form-check-label {
+    margin-left: 6px;
+}

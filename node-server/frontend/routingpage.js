@@ -55,6 +55,12 @@ window.renderPage = function (container) {
                 <button class="fab popup-fab active" id="popupToggleFAB" title="Toggle Accident Info">
                     <i class="bi bi-chat-square-text-fill"></i>
                 </button>
+
+                <div class="form-check form-switch theme-switch">
+                    <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+                    <label class="form-check-label" for="darkModeSwitch">Dark</label>
+                </div>
+
             </div>
 
             <!-- Bottom Routing Button -->
@@ -111,11 +117,11 @@ window.renderPage = function (container) {
                             <!-- Placeholder inputs -->
                             <div class="mb-3">
                                 <label class="form-label">Starting Point</label>
-                                <input type="text" class="form-control" placeholder="Enter start location">
+                                <input id="startInput" type="text" class="form-control" placeholder="lat,lng">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Destination</label>
-                                <input type="text" class="form-control" placeholder="Enter destination">
+                                <input id="endInput" type="text" class="form-control" placeholder="lat,lng">
                             </div>
                             <!-- Route Considerations Section -->
                             <div class="route-considerations mt-4">
@@ -171,6 +177,32 @@ window.renderPage = function (container) {
             layerModal.show();
 
             initializeMap();
+
+            function setBasemap(isDark) {
+                if (activeBaseLayer) {
+                    map.removeLayer(activeBaseLayer);
+                }
+                activeBaseLayer = isDark ? cartoDark : cartoLight;
+                map.addLayer(activeBaseLayer);
+
+                localStorage.setItem("saafrDarkMode", isDark ? "1" : "0");
+                document.body.classList.toggle("dark-mode", isDark);
+            }
+
+
+            const saved = localStorage.getItem("saafrDarkMode");
+            const initialDark = saved === "1";
+
+            const switchEl = document.getElementById("darkModeSwitch");
+            if (switchEl) {
+                switchEl.checked = initialDark;
+                setBasemap(initialDark);
+
+                switchEl.addEventListener("change", function () {
+                    setBasemap(this.checked);
+                });
+            }
+
         }, 100);
     })();
 
@@ -185,6 +217,10 @@ window.renderPage = function (container) {
 
     // These variables store our map and layers so we can access them from any function
     var map;
+    let cartoLight;
+    let cartoDark;
+    let activeBaseLayer;
+
     var layerGroups = layerGroups || {
         accidents: null,
         roadNetwork: null,
@@ -210,11 +246,19 @@ window.renderPage = function (container) {
 
         // Add the base map tiles (OpenStreetMap)
         // This provides the background map showing streets, buildings, etc.
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19,  // Maximum zoom level
-            minZoom: 10   // Minimum zoom level (prevents zooming out too far)
-        }).addTo(map);
+        cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+            attribution: "&copy; OpenStreetMap &copy; CARTO",
+            maxZoom: 19
+        });
+
+        cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            attribution: "&copy; OpenStreetMap &copy; CARTO",
+            maxZoom: 19
+        });
+
+        activeBaseLayer = cartoLight;
+        activeBaseLayer.addTo(map);
+
 
 
 
@@ -579,46 +623,72 @@ window.renderPage = function (container) {
     TODO:
     - Start- und Endpunkt dynamisch aus den Eingabefeldern holen
     */
-    let routeLayer = null;
-    document.getElementById("routeBtn").addEventListener("click", () => {
+let routeLayer = null;
+
+async function geocodeAddress(query) {
+    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(query);
+    const response = await fetch(url, { headers: { "Accept": "application/json" } });
+
+    const results = await response.json();
+    if (!Array.isArray(results) || results.length === 0) return null;
+
+    return { lat: Number(results[0].lat), lng: Number(results[0].lon) };
+}
+
+function parseLatLngOrNull(value) {
+    const parts = value.split(",").map(v => Number(v.trim()));
+    if (parts.length !== 2) return null;
+    if (!Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return null;
+    return { lat: parts[0], lng: parts[1] };
+}
+
+const routeBtn = document.getElementById("routeBtn");
+if (!routeBtn) {
+    console.error("routeBtn nicht gefunden. Routing Modal wurde vermutlich nicht gerendert.");
+} else {
+    routeBtn.addEventListener("click", async () => {
+        const startEl = document.getElementById("startInput");
+        const endEl = document.getElementById("endInput");
+
+        if (!startEl || !endEl) {
+            console.error("Start oder End Input nicht gefunden.");
+            return;
+        }
+
+        const startText = startEl.value.trim();
+        const endText = endEl.value.trim();
+
+        let start = parseLatLngOrNull(startText) || await geocodeAddress(startText);
+        let end = parseLatLngOrNull(endText) || await geocodeAddress(endText);
+
+        console.log("Start verwendet:", start);
+        console.log("End verwendet:", end);
+
+        if (!start || !end) {
+            alert("Start oder Ziel konnten nicht gefunden werden. Nutzen Sie lat,lng oder eine Adresse wie Prinzipalmarkt 10 Münster.");
+            return;
+        }
+
         fetch("http://localhost:3000/routing2", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                start: { lat: 51.95592733851593, lng: 7.62645680767258 },
-                end: { lat: 51.96947351074274, lng: 7.5956409639675355 }
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start: start, end: end })
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response:", data);
+        .then(response => response.json())
+        .then(data => {
+            const path = data.paths[0];
+            const coords = path.points.coordinates.map(c => [c[1], c[0]]);
 
-                const path = data.paths[0];
+            if (routeLayer) map.removeLayer(routeLayer);
+            routeLayer = L.polyline(coords, { weight: 5 }).addTo(map);
 
-                // Extract the coordinates from GraphHopper GeoJSON
-                const coords = path.points.coordinates.map(c => [c[1], c[0]]);
-                // GraphHopper = [lng, lat], Leaflet = [lat, lng]
-
-                // Remove previous route
-                if (routeLayer) {
-                    map.removeLayer(routeLayer);
-                }
-
-                // Draw polyline
-                routeLayer = L.polyline(coords, { weight: 5 }).addTo(map);
-
-                bootstrap.Modal.getInstance(document.getElementById('routingModal')).hide();
-
-                // Zoom to route
-                map.fitBounds(routeLayer.getBounds());
-
-            })
-            .catch(err => {
-                console.error("Error:", err);
-            });
+            bootstrap.Modal.getInstance(document.getElementById("routingModal")).hide();
+            map.fitBounds(routeLayer.getBounds());
+        })
+        .catch(err => console.error(err));
     });
+}
+
 
 
     // ============================================
