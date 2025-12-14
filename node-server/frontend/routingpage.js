@@ -39,6 +39,39 @@ window.renderPage = async function () {
     window.routingStore.layers.accidents =
         await window.saafr.layers.createAccidentsLayer("test_data/munster_2020_2024_utm.geojson");
 
+    //window.routingStore.layers.accidentWMS =
+    //window.saafr.layers.createWmsLayer("http://localhost:8080/geoserver/wms", "streets");
+    createWmsLayer = function (wmsUrl, layerName) {
+        if (!wmsUrl || !layerName) {
+            throw new Error("WMS URL und Layername müssen angegeben werden.");
+        }
+
+        const wmsLayer = L.tileLayer.wms(wmsUrl, {
+            layers: layerName,
+            transparent: true,
+            format: 'image/png',
+            attribution: 'Map data © WMS Server'
+        });
+
+        return wmsLayer;
+    };
+    window.routingStore.layers.accidentWMS = createWmsLayer("http://localhost:8080/geoserver/wms", "streets");
+    // Tastendruck-Listener hinzufügen
+    document.addEventListener("keydown", (event) => {
+        // Prüfen, ob die Taste "m" gedrückt wurde
+        if (event.key.toLowerCase() === "m") {
+            const map = window.routingStore.map;
+            const wmsLayer = window.routingStore.layers.accidentWMS;
+
+            if (map.hasLayer(wmsLayer)) {
+                map.removeLayer(wmsLayer); // Layer ausblenden, wenn schon sichtbar
+            } else {
+                map.addLayer(wmsLayer); // Layer hinzufügen, wenn noch nicht sichtbar
+            }
+        }
+    });
+
+
     if (window.routingStore.map.getZoom() >= 13) {
         window.routingStore.map.addLayer(window.routingStore.layers.accidents);
     }
