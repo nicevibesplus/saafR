@@ -22,6 +22,7 @@ window.renderPage = async function () {
     window.routingStore = window.saafr.state.createStore();
 
     window.saafr.map.createMap("map", [51.9607, 7.6261], 13, window.routingStore);
+    window.saafr.routing.initRoutingUI(window.routingStore);
 
     const saved = localStorage.getItem("saafrDarkMode");
     const initialDark = saved === "1";
@@ -44,7 +45,6 @@ window.renderPage = async function () {
 
     window.saafr.map.initZoomVisibility(window.routingStore, 13);
     window.saafr.map.initLayerToggles(window.routingStore);
-    window.saafr.routing.initRoutingUI(window.routingStore);
 
     if (!window._saafrRoutingModalListener) {
         window._saafrRoutingModalListener = function (event) {

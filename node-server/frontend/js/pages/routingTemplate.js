@@ -67,14 +67,16 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Starting Point</label>
-                                    <input id="startInput" type="text" class="form-control" placeholder="Insert start address or lat,lng">
+                                <div class="input-group">
+                                    <input id="startInput" type="text" class="form-control" placeholder="lat,lng or address">
+                                    <button class="btn btn-outline-secondary" type="button" id="pickStartBtn">Choose on map</button>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Destination</label>
-                                    <input id="endInput" type="text" class="form-control" placeholder="Insert destination address or lat,lng">
-                                </div>
+
+                            <div class="input-group">
+                            <input id="endInput" type="text" class="form-control" placeholder="lat,lng or address">
+                            <button class="btn btn-outline-secondary" type="button" id="pickEndBtn">Choose on map</button>
+                            </div>
+
 
                                 <div class="route-considerations mt-4">
                                     <h6 class="mb-2">The routing considers:</h6>

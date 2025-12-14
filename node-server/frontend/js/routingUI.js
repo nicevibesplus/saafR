@@ -14,6 +14,52 @@ and zooms to the calculated route
         const routeBtn = document.getElementById("routeBtn");
         if (!routeBtn) return;
 
+        const pickStartBtn = document.getElementById("pickStartBtn");
+        const pickEndBtn = document.getElementById("pickEndBtn");
+
+        function startPickMode(targetInputId) {
+            const modalEl = document.getElementById("routingModal");
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            const map = store.map;
+            if (!map) return;
+
+            map.getContainer().style.cursor = "crosshair";
+
+            const onceClick = function (e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+
+                const input = document.getElementById(targetInputId);
+                if (input) input.value = `${lat},${lng}`;
+
+                L.popup()
+                .setLatLng(e.latlng)
+                .setContent("Point selected")
+                .openOn(map);
+
+                map.getContainer().style.cursor = "";
+                map.off("click", onceClick);
+
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            };
+
+            map.on("click", onceClick);
+        }
+
+        if (pickStartBtn) {
+            pickStartBtn.addEventListener("click", function () {
+                startPickMode("startInput");
+            });
+        }
+
+        if (pickEndBtn) {
+            pickEndBtn.addEventListener("click", function () {
+                startPickMode("endInput");
+            });
+        }
+
         routeBtn.addEventListener("click", async function () {
             const map = store.map;
             if (!map) return;
@@ -21,6 +67,8 @@ and zooms to the calculated route
             const startEl = document.getElementById("startInput");
             const endEl = document.getElementById("endInput");
             if (!startEl || !endEl) return;
+
+            store.route = store.route || {};
 
             const startText = startEl.value.trim();
             const endText = endEl.value.trim();
@@ -42,6 +90,17 @@ and zooms to the calculated route
 
             if (store.route.layer) map.removeLayer(store.route.layer);
             store.route.layer = L.polyline(coords, { weight: 5 }).addTo(map);
+
+            //Adding marker for end point
+            const targetLabel = endText || "Ziel";
+            
+            if (store.route.endMarker) {
+                store.map.removeLayer(store.route.endMarker);       
+            }
+
+            store.route.endMarker = L.marker([end.lat, end.lng])
+            .addTo(store.map)
+            .bindPopup(`${targetLabel}`);
 
             const modalEl = document.getElementById("routingModal");
             const modal = bootstrap.Modal.getInstance(modalEl);
