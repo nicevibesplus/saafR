@@ -91,6 +91,16 @@ and zooms to the calculated route
             if (store.route.layer) map.removeLayer(store.route.layer);
             store.route.layer = L.polyline(coords, { weight: 5 }).addTo(map);
 
+            const timeMs = path.time;
+            const minutes = Math.round(timeMs / 60000);
+
+            // Show Bootstrap card
+            const routeInfo = document.getElementById("routeInfoPanel");
+            const routeTime = document.getElementById("routeTime");
+
+            routeTime.textContent = `${minutes} min`;
+            routeInfo.classList.remove("d-none");
+
             //Adding marker for end point
             const targetLabel = endText || "Ziel";
             

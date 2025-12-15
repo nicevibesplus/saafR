@@ -311,3 +311,12 @@ body {
 .theme-switch .form-check-label {
     margin-left: 6px;
 }
+
+.route-info-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 1000;
+}
