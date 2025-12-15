@@ -2,13 +2,21 @@ window._saafrRoutingModalListener = window._saafrRoutingModalListener || null;
 
 window.renderPage = async function () {
     const content = document.getElementById("content");
-    content.innerHTML = window.saafr.templates.getRoutingHtml();
+    try {
+        const response = await fetch('routingpagecontent.html');
+        if (!response.ok) throw new Error("Could not load routingpagecontent.html");
+        const html = await response.text();
+        content.innerHTML = html;
+    } catch (error) {
+        console.error(error);
+        return; // Stop execution if HTML fails to load
+    }
 
     const layerModalEl = document.getElementById("layerModal");
     const routingModalEl = document.getElementById("routingModal");
 
     if (!layerModalEl || !routingModalEl) {
-        console.error("Modal Elemente fehlen im DOM. Prüfen Sie routingTemplate.js.");
+        console.error("Modal Elemente fehlen im DOM.");
         return;
     }
 
