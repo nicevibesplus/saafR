@@ -11,7 +11,16 @@
         </button>
 
         <div class="form-check form-switch theme-switch">
-            <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+            <label class="form-check-label" for="darkModeSwitch" style="cursor:pointer;">
+                <i class="bi bi-moon-fill"></i>
+            </label>
+            <input class="form-check-input d-none" type="checkbox" id="darkModeSwitch">
+        </div>
+        <div class="form-check form-switch theme-switch">
+            <label class="form-check-label" for="toggleRoadNetwork" style="cursor:pointer;">
+                <i class="bi bi-map-fill"></i>
+            </label>
+            <input class="form-check-input d-none" type="checkbox" id="toggleRoadNetwork">
         </div>
     </div>
 
@@ -31,7 +40,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="toggleAccidents" checked>
+                        <input class="form-check-input" type="checkbox" id="toggleAccidents" unchecked>
                         <label class="form-check-label" for="toggleAccidents">
                             <span class="legend-marker accidents"></span>
                             Accidents
@@ -39,7 +48,7 @@
                     </div>
 
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="toggleAnxietyZones" checked>
+                        <input class="form-check-input" type="checkbox" id="toggleAnxietyZones" unchecked>
                         <label class="form-check-label" for="toggleAnxietyZones">
                             <span class="legend-marker anxiety"></span>
                             Anxiety Zones

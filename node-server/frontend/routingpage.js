@@ -55,16 +55,14 @@ window.renderPage = async function () {
         }
     });
 
-    document.addEventListener("keydown", (event) => {
-        // Prüfen, ob die Taste "m" gedrückt wurde
-        if (event.key.toLowerCase() === "m") {
-            if (window.saafr.store.isRoadNetworkLayerVisible()) {
-                window.saafr.store.map.removeLayer(window.saafr.store.getRoadNetworkLayer());
-            }
-            window.saafr.store.setRoadNetworkLayerVisibility(!window.saafr.store.isRoadNetworkLayerVisible());
-            if (window.saafr.store.isRoadNetworkLayerVisible()) {
-                window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
-            }
+    const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
+    roadNetworkSwitch.addEventListener("change", function () {
+        if (window.saafr.store.isRoadNetworkLayerVisible()) {
+            window.saafr.store.map.removeLayer(window.saafr.store.getRoadNetworkLayer());
+        }
+        window.saafr.store.setRoadNetworkLayerVisibility(!window.saafr.store.isRoadNetworkLayerVisible());
+        if (window.saafr.store.isRoadNetworkLayerVisible()) {
+            window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
         }
     });
 
