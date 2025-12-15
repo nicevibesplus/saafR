@@ -38,7 +38,7 @@ window.renderPage = async function () {
         console.log("Accident layer toggle changed:", this.checked);
         console.log("Current is visible:", window.saafr.store.isAccidentPointsLayerVisible());
         if (window.saafr.store.isAccidentPointsLayerVisible()) {
-            window.saafr.store.map.removeLayer(window.saafr.store.getAccidentPointsLayer());
+            window.saafr.store.map.removeLayer(await window.saafr.store.getAccidentPointsLayer());
         }
         window.saafr.store.setAccidentPointsLayerVisibility(this.checked);
         console.log("New is visible:", window.saafr.store.isAccidentPointsLayerVisible());
