@@ -12,17 +12,6 @@
     window.saafr = window.saafr || {};
     window.saafr.map = window.saafr.map || {};
 
-    window.saafr.map.toggleLayer = function (store, layerName, isVisible) {
-        const map = store.map;
-        const layer = store.layers[layerName];
-        if (!map || !layer) return;
-
-        if (isVisible) map.addLayer(layer);
-        else map.removeLayer(layer);
-
-        window.saafr.map.updateRoutingModalStatus(store);
-    };
-
 
     window.saafr.map.updateRoutingModalStatus = function (store) {
         const map = store.map;
