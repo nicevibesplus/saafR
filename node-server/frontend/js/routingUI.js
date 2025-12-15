@@ -35,9 +35,9 @@ and zooms to the calculated route
                 if (input) input.value = `${lat},${lng}`;
 
                 L.popup()
-                .setLatLng(e.latlng)
-                .setContent("Point selected")
-                .openOn(map);
+                    .setLatLng(e.latlng)
+                    .setContent("Point selected")
+                    .openOn(map);
 
                 map.getContainer().style.cursor = "";
                 map.off("click", onceClick);
@@ -85,6 +85,7 @@ and zooms to the calculated route
             }
 
             const data = await window.saafr.routing.requestRoute(start, end);
+            console.log(data);
             const path = data.paths[0];
             const coords = path.points.coordinates.map(c => [c[1], c[0]]);
 
@@ -101,16 +102,36 @@ and zooms to the calculated route
             routeTime.textContent = `${minutes} min`;
             routeInfo.classList.remove("d-none");
 
+            const startNavigationBtn = document.getElementById("startNavigationBtn");
+            const navigationPanel = document.getElementById("navigationPanel");
+            const navigationSteps = document.getElementById("navigationSteps");
+
+            // Clear old steps
+            navigationSteps.innerHTML = "";
+
+            startNavigationBtn.onclick = () => {
+                path.instructions.forEach(step => {
+                    const li = document.createElement("li");
+                    li.textContent = step.text || step.instruction || step;
+                    navigationSteps.appendChild(li);
+                });
+
+                navigationPanel.classList.remove("d-none");
+
+                map.setView(coords[0], 16);
+            };
+
+
             //Adding marker for end point
             const targetLabel = endText || "Ziel";
-            
+
             if (store.route.endMarker) {
-                store.map.removeLayer(store.route.endMarker);       
+                store.map.removeLayer(store.route.endMarker);
             }
 
             store.route.endMarker = L.marker([end.lat, end.lng])
-            .addTo(store.map)
-            .bindPopup(`${targetLabel}`);
+                .addTo(store.map)
+                .bindPopup(`${targetLabel}`);
 
             const modalEl = document.getElementById("routingModal");
             const modal = bootstrap.Modal.getInstance(modalEl);
