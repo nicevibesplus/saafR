@@ -1,15 +1,22 @@
-window.routingStore = null;
 window._saafrRoutingModalListener = window._saafrRoutingModalListener || null;
 
 window.renderPage = async function () {
     const content = document.getElementById("content");
-    content.innerHTML = window.saafr.templates.getRoutingHtml();
+    try {
+        const response = await fetch('routingpagecontent.html');
+        if (!response.ok) throw new Error("Could not load routingpagecontent.html");
+        const html = await response.text();
+        content.innerHTML = html;
+    } catch (error) {
+        console.error(error);
+        return; // Stop execution if HTML fails to load
+    }
 
     const layerModalEl = document.getElementById("layerModal");
     const routingModalEl = document.getElementById("routingModal");
 
     if (!layerModalEl || !routingModalEl) {
-        console.error("Modal Elemente fehlen im DOM. Prüfen Sie routingTemplate.js.");
+        console.error("Modal Elemente fehlen im DOM.");
         return;
     }
 
@@ -19,76 +26,47 @@ window.renderPage = async function () {
     bootstrap.Modal.getOrCreateInstance(layerModalEl).show();
 
     window.saafr.ui.initMobileGuards();
-    window.routingStore = window.saafr.state.createStore();
 
-    window.saafr.map.createMap("map", [51.9607, 7.6261], 13, window.routingStore);
-    window.saafr.routing.initRoutingUI(window.routingStore);
+    window.saafr.store.getMap(); // Stelle sicher, dass die Karte initialisiert ist
+    window.saafr.store.map.addLayer(window.saafr.store.getActiveBase());
+    window.saafr.routing.initRoutingUI(window.saafr.store);
 
-    const saved = localStorage.getItem("saafrDarkMode");
-    const initialDark = saved === "1";
-    const switchEl = document.getElementById("darkModeSwitch");
 
-    if (switchEl) {
-        switchEl.checked = initialDark;
-        window.saafr.map.setBasemap(window.routingStore, initialDark);
-        switchEl.addEventListener("change", function () {
-            window.saafr.map.setBasemap(window.routingStore, this.checked);
-        });
-    }
+    const darkModeSwitch = document.getElementById("darkModeSwitch");
+    darkModeSwitch.addEventListener("change", function () {
+        window.saafr.store.map.removeLayer(window.saafr.store.getActiveBase());
+        window.saafr.store.setDarkMode(this.checked);
+        var layer = window.saafr.store.getActiveBase();
+        window.saafr.store.map.addLayer(layer);
+        layer.bringToBack();
+    });
 
-    window.routingStore.layers.accidents =
-        await window.saafr.layers.createAccidentsLayer("test_data/munster_2020_2024_utm.geojson");
-
-    //window.routingStore.layers.accidentWMS =
-    //window.saafr.layers.createWmsLayer("http://localhost:8080/geoserver/wms", "streets");
-    createWmsLayer = function (wmsUrl, layerName) {
-        if (!wmsUrl || !layerName) {
-            throw new Error("WMS URL und Layername müssen angegeben werden.");
+    const accidentSwitch = document.getElementById("toggleAccidents");
+    accidentSwitch.addEventListener("change", async function () {
+        console.log("Accident layer toggle changed:", this.checked);
+        console.log("Current is visible:", window.saafr.store.isAccidentPointsLayerVisible());
+        if (window.saafr.store.isAccidentPointsLayerVisible()) {
+            window.saafr.store.map.removeLayer(await window.saafr.store.getAccidentPointsLayer());
         }
-
-        const wmsLayer = L.tileLayer.wms(wmsUrl, {
-            layers: layerName,
-            transparent: true,
-            format: 'image/png',
-            attribution: 'Map data © WMS Server'
-        });
-
-        return wmsLayer;
-    };
-    window.routingStore.layers.accidentWMS = createWmsLayer("http://localhost:8080/geoserver/wms", "streets");
-    // Tastendruck-Listener hinzufügen
-    document.addEventListener("keydown", (event) => {
-        // Prüfen, ob die Taste "m" gedrückt wurde
-        if (event.key.toLowerCase() === "m") {
-            const map = window.routingStore.map;
-            const wmsLayer = window.routingStore.layers.accidentWMS;
-
-            if (map.hasLayer(wmsLayer)) {
-                map.removeLayer(wmsLayer); // Layer ausblenden, wenn schon sichtbar
-            } else {
-                map.addLayer(wmsLayer); // Layer hinzufügen, wenn noch nicht sichtbar
-            }
+        window.saafr.store.setAccidentPointsLayerVisibility(this.checked);
+        console.log("New is visible:", window.saafr.store.isAccidentPointsLayerVisible());
+        if (this.checked) {
+            window.saafr.store.map.addLayer(await window.saafr.store.getAccidentPointsLayer());
         }
     });
 
+    const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
+    roadNetworkSwitch.addEventListener("change", function () {
+        if (window.saafr.store.isRoadNetworkLayerVisible()) {
+            window.saafr.store.map.removeLayer(window.saafr.store.getRoadNetworkLayer());
+        }
+        window.saafr.store.setRoadNetworkLayerVisibility(!window.saafr.store.isRoadNetworkLayerVisible());
+        if (window.saafr.store.isRoadNetworkLayerVisible()) {
+            window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
+        }
+    });
 
-    if (window.routingStore.map.getZoom() >= 13) {
-        window.routingStore.map.addLayer(window.routingStore.layers.accidents);
-    }
-
-    window.saafr.map.initZoomVisibility(window.routingStore, 13);
-    window.saafr.map.initLayerToggles(window.routingStore);
-
-    if (!window._saafrRoutingModalListener) {
-        window._saafrRoutingModalListener = function (event) {
-            if (event.target && event.target.id === "routingModal") {
-                if (window.routingStore) {
-                    window.saafr.map.updateRoutingModalStatus(window.routingStore);
-                }
-            }
-        };
-        document.addEventListener("show.bs.modal", window._saafrRoutingModalListener);
-    }
+    //window.saafr.map.initLayerToggles(window.saafr.store);
 };
 
 window.unmountPage = function () {
