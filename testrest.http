@@ -31,8 +31,19 @@ Content-Type: application/json
     "end": { "lat": 51.96947351074274, "lng": 7.5956409639675355 }
 }
 
+###
+POST http://localhost:8990/route
+Content-Type: application/json
 
-
+{
+    "points": [
+      [7.62645680767258, 51.95592733851593],
+      [7.5956409639675355, 51.96947351074274]
+    ],
+    "profile": "bike_crash",
+    "points_encoded": false,
+    "instructions": true
+}
 ###
 
 POST http://localhost:3000/routing2

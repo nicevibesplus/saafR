@@ -28,10 +28,10 @@
     };
 
     window.saafr.routing.requestRoute = async function (start, end) {
-        const response = await fetch("http://localhost:3000/routing2", {
+        const response = await fetch("http://localhost:3000/route", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ start: start, end: end })
+            body: JSON.stringify({ start: start, end: end, useCrashModel: true })
         });
         return await response.json();
     };

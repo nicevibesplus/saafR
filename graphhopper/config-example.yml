@@ -43,6 +43,9 @@ graphhopper:
 
    - name: bike
      custom_model_files: [bike.json, bike_elevation.json]
+    
+   - name: bike_crash
+     custom_model_files: [bike.json, bike_elevation.json, crashes.json]
 #
 #    - name: racingbike
 #      custom_model_files: [racingbike.json, bike_elevation.json]
@@ -86,6 +89,7 @@ graphhopper:
   profiles_ch:
     - profile: car
     - profile: bike
+    - profile: bike_crash
 
   # Hybrid mode:
   # Similar to speed mode, the hybrid mode (Landmarks, LM) also speeds up routing by doing calculating auxiliary data
@@ -108,7 +112,7 @@ graphhopper:
   #   country,curvature,average_slope,max_slope,car_temporal_access,bike_temporal_access,foot_temporal_access
   # Private roads are blocked by default to disable this you can specify (also applies to other access encoded values like bike_access):
   #   car_access|block_private=false
-  graph.encoded_values: car_access, car_average_speed, road_access, foot_access, hike_rating, foot_priority, country, road_class, foot_road_access, mtb_rating, foot_average_speed, average_slope, bike_priority, bike_road_access, bike_access, bike_average_speed
+  graph.encoded_values: car_access, car_average_speed, road_access, foot_access, hike_rating, foot_priority, country, road_class, foot_road_access, mtb_rating, foot_average_speed, average_slope, bike_priority, bike_road_access, bike_access, bike_average_speed, crash_count
   #### Speed, hybrid and flexible mode ####
 
   # To make CH preparation faster for multiple profiles you can increase the default threads if you have enough RAM.

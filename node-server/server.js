@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, 'frontend')));
 
 // SPA fallback (serve index.html for all unknown GET requests)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 // PostgreSQL/PostGIS connection pool
@@ -81,7 +81,7 @@ app.get('/get_edges_with_accidents', async (req, res) => {
         GROUP BY s.osm_id, s.geom
         ORDER BY crash_count DESC
     ) row;`;
-     
+
     pool.query(query, (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -176,6 +176,43 @@ app.post('/routing', async (req, res) => {
         console.error('Error in routing:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
+});
+
+app.post('/route', async (req, res) => {
+    try {
+        const { start, end, useCrashModel = false } = req.body;
+        const { lat: start_lat, lng: start_lng } = start;
+        const { lat: end_lat, lng: end_lng } = end;
+
+        const routingBody = {
+            "points": [
+                [start_lng, start_lat],
+                [end_lng, end_lat]
+            ],
+            "profile": useCrashModel ? "bike_crash" : "bike",
+            "points_encoded": false,
+            "instructions": true
+        };
+
+        console.log('Routing body:', JSON.stringify(routingBody, null, 2));
+        console.log('Sending request to custom GH:', `http://graphhopper:8989/route`);
+        const route = await fetch(`http://graphhopper:8990/route`, {
+            method: 'POST',
+            body: JSON.stringify(routingBody),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Received response from custom GH:', route);
+        const answer = await route.json();
+        res.json(answer);
+
+    } catch (error) {
+        console.error('Error in /route:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+
 });
 
 app.post('/routing2', async (req, res) => {
