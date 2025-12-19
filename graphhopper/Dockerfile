@@ -1,35 +1,41 @@
-# --- Stage 1: Build & Patch ---
+# --- Stage 1: Build & Patch (Bleibt fast gleich) ---
 FROM maven:3.9.5-eclipse-temurin-21 as build
 WORKDIR /build
 
-# CLONE VERSION 11.0
+# 1. Clone GraphHopper v11.0
 RUN git clone --branch 11.0 --depth 1 https://github.com/graphhopper/graphhopper.git .
 
-COPY custom/CrashCountParser.java core/src/main/java/com/graphhopper/routing/util/parsers/CrashCountParser.java
-COPY custom/CrashCount.java core/src/main/java/com/graphhopper/routing/ev/CrashCount.java
-COPY custom/CustomImportRegistry.java core/src/main/java/com/graphhopper/routing/ev/CustomImportRegistry.java
-COPY custom/crashes.json core/src/main/resources/com/graphhopper/custom_models/crashes.json
+# 2. Dependency Injection (PostgreSQL)
+RUN sed -i 's|</dependencies>| \
+        <dependency> \
+            <groupId>org.postgresql</groupId> \
+            <artifactId>postgresql</artifactId> \
+            <version>42.7.2</version> \
+        </dependency> \
+    </dependencies>|' core/pom.xml
 
-# Patch the server to use your custom class
-RUN sed -i 's/new DefaultImportRegistry()/new CustomImportRegistry()/g' \
-    core/src/main/java/com/graphhopper/GraphHopper.java
+# 3. Source Injection (Deine Java Patches)
+COPY java_patch/com /build/core/src/main/java/com
 
-# Build
-RUN mvn clean install -DskipTests
+# 4. Build
+RUN mvn clean package -DskipTests
 
-# --- Stage 2: Runtime ---
+# --- Stage 2: Runtime (Massiv gekürzt) ---
 FROM eclipse-temurin:21-jre
 ENV JAVA_OPTS "-Xmx2g -Xms2g"
 WORKDIR /graphhopper
+
+# Wir erstellen den Ordner für Daten, falls benötigt
 RUN mkdir -p /data
 
-COPY --from=build /build/web/target/graphhopper*.jar ./graphhopper.jar
-COPY --from=build /build/config-example.yml ./config.yml
+# Wir kopieren NUR noch das JAR. Die Config kommt von außen.
+COPY --from=build /build/web/target/graphhopper-web-*.jar ./graphhopper.jar
 
-# Allow external access
-RUN sed -i 's/^ *bind_host: localhost/bind_host: 0.0.0.0/' config.yml
+# Port freigeben
+EXPOSE 8989
 
-VOLUME [ "/data" ]
-EXPOSE 8989 8990
-
-ENTRYPOINT [ "java", "-Ddw.graphhopper.datareader.file=data.osm.pbf", "-jar", "graphhopper.jar", "server", "config.yml" ]
+# ENTRYPOINT:
+# Ich habe die -D Parameter entfernt!
+# Grund: Wenn du eine config.yml mountest, solltest du Pfade und Mappings DORT definieren.
+# Das vermeidet Verwirrung, wo was eingestellt ist.
+ENTRYPOINT [ "java", "-jar", "graphhopper.jar", "server", "config.yml" ]

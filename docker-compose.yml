@@ -46,6 +46,7 @@ services:
     container_name: graphhopper
     ports:
       - 8989:8989
+    env_file: .env
     volumes:
-      - ./graphhopper/data/muenster-crashes.osm.pbf:/graphhopper/data.osm.pbf  # Persist the graph data
-      - ./graphhopper/config-example.yml:/graphhopper/config.yml  # Custom configuration
+      - ./graphhopper/data.osm.pbf:/graphhopper/data.osm.pbf  # Persist the graph data
+      - ./graphhopper/config.yml:/graphhopper/config.yml  # Custom configuration

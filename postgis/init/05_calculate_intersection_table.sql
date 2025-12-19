@@ -15,7 +15,11 @@ crashes3857 AS (
 )
 SELECT
     s.osm_id AS osm_id, 
-    c.ogc_fid AS crash_id
+    c.ogc_fid AS crash_id,
+    c.ujahr AS crash_year,
+    c.umonat AS crash_month,
+    c.ustunde AS crash_hour,
+    c.uwochentag AS crash_weekday
 FROM
     streets3857 s
 JOIN
