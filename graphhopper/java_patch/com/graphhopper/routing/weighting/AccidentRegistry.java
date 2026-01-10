@@ -32,7 +32,7 @@ public class AccidentRegistry {
         LOGGER.info("Starte Laden der Unfalldaten aus PostGIS...");
         try (Connection con = DriverManager.getConnection(url, user, pass)) {
             // Passe Tabellen- und Spaltennamen an deine DB an!
-            String query = "SELECT osm_id, crash_year, crash_month, crash_time, crash_weekday FROM crash_streets_match";
+            String query = "SELECT osm_id, crash_year, crash_month, crash_hour, crash_weekday FROM crash_streets_match";
 
             try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
                 int count = 0;
@@ -41,7 +41,7 @@ public class AccidentRegistry {
                     AccidentData data = new AccidentData(
                         rs.getInt("crash_year"),
                         rs.getInt("crash_month"),
-                        rs.getInt("crash_time"),
+                        rs.getInt("crash_hour"),
                         rs.getInt("crash_weekday")
                     );
                     accidentMap.computeIfAbsent(osmId, k -> new ArrayList<>()).add(data);

@@ -32,7 +32,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8990/route
+POST http://localhost:8989/route
 Content-Type: application/json
 
 {
@@ -40,9 +40,14 @@ Content-Type: application/json
       [7.62645680767258, 51.95592733851593],
       [7.5956409639675355, 51.96947351074274]
     ],
-    "profile": "bike_crash",
     "points_encoded": false,
-    "instructions": true
+    "profile": "bikesafe",
+    "instructions": true,
+    "include_crashes": true,
+    "req_year": 2024,
+    "req_month": 10,
+    "req_hour": 14,
+    "req_weekday": 5
 }
 ###
 

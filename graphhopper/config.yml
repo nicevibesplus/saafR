@@ -46,8 +46,10 @@ graphhopper:
      custom_model_files: [bike.json, bike_elevation.json]
 
    - name: bikesafe
-     custom_model_files: [bike.json, bike_elevation.json]
      weighting: custom
+     custom_model_files: [bike.json, bike_elevation.json]
+     hints:
+      vehicle: bike
 #
 #    - name: racingbike
 #      custom_model_files: [racingbike.json, bike_elevation.json]
@@ -110,7 +112,7 @@ graphhopper:
   #   country,curvature,average_slope,max_slope,car_temporal_access,bike_temporal_access,foot_temporal_access
   # Private roads are blocked by default to disable this you can specify (also applies to other access encoded values like bike_access):
   #   car_access|block_private=false
-  graph.encoded_values: car_access, car_average_speed, road_access, foot_access, hike_rating, foot_priority, country, road_class, foot_road_access, mtb_rating, foot_average_speed, average_slope, bike_priority, bike_road_access, bike_access, bike_average_speed
+  graph.encoded_values: car_access, car_average_speed, road_access, foot_access, hike_rating, foot_priority, country, road_class, foot_road_access, mtb_rating, foot_average_speed, average_slope, bike_priority, bike_road_access, bike_access, bike_average_speed, osm_way_id
   #### Speed, hybrid and flexible mode ####
 
   # To make CH preparation faster for multiple profiles you can increase the default threads if you have enough RAM.
@@ -246,7 +248,7 @@ server:
   - type: http
     port: 8989
     # for security reasons bind to localhost
-    bind_host: localhost
+    bind_host: 0.0.0.0
     # increase GET request limit - not necessary if /maps UI is not used or used without custom models
     max_request_header_size: 50k
   request_log:
@@ -254,7 +256,7 @@ server:
   admin_connectors:
   - type: http
     port: 8990
-    bind_host: localhost
+    bind_host: 0.0.0.0
 # See https://www.dropwizard.io/en/latest/manual/core.html#logging
 logging:
   appenders:
@@ -279,3 +281,5 @@ logging:
           archive: false
           logFormat: '[%level] %msg%n'
     "com.graphhopper.routing.weighting.AccidentRegistry": INFO
+    "com.graphhopper.routing.weighting.SafetyWeighting": INFO
+    "com.graphhopper.routing.DefaultWeightingFactory": INFO

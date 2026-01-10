@@ -27,8 +27,10 @@ import static com.graphhopper.routing.weighting.TurnCostProvider.NO_TURN_COST_PR
 import static com.graphhopper.routing.weighting.custom.CustomModelParser.createWeightingParameters;
 import static com.graphhopper.util.Helper.toLowerCase;
 
-public class DefaultWeightingFactory implements WeightingFactory {
+import java.util.logging.Logger;
 
+public class DefaultWeightingFactory implements WeightingFactory {
+    private static final Logger LOGGER = Logger.getLogger(DefaultWeightingFactory.class.getName());
     private final BaseGraph graph;
     private final EncodingManager encodingManager;
 
@@ -39,9 +41,11 @@ public class DefaultWeightingFactory implements WeightingFactory {
 
     @Override
     public Weighting createWeighting(Profile profile, PMap requestHints, boolean disableTurnCosts) {
+        LOGGER.info("hints: " + requestHints.toString());
         PMap hints = new PMap();
         hints.putAll(profile.getHints());
         hints.putAll(requestHints);
+        LOGGER.info("hints: " + hints.toString());
 
         String weightingStr = toLowerCase(profile.getWeighting());
         if (weightingStr.isEmpty())
