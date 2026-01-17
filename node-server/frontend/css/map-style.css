@@ -130,29 +130,27 @@ body {
 }
 
 .routing-button {
-    background: #ffffff;
+    background: white;
     color: #495057;
     border: none;
     padding: 12px 32px;
     border-radius: 25px;
     font-size: 18px;
-    font-weight: 600;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     cursor: pointer;
 }
 
 .routing-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    color: #343a40;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .routing-button:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: scale(0.98);
 }
 
 /* "Choose on map" Buttons */
