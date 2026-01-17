@@ -145,6 +145,34 @@ body {
     transform: translateY(0);
 }
 
+/* "Choose on map" Buttons */
+.btn-pick-map {
+    background: #8a1ba9;
+    color: white;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(138, 27, 169, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn-pick-map:hover {
+    background: #6d1589;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(138, 27, 169, 0.4);
+    color: white;
+}
+
+.btn-pick-map:active {
+    transform: translateY(0);
+    background: #5a0f6f;
+}
+
 
 /* ========================================
    ROUTING MODAL - ROUTE CONSIDERATIONS
@@ -243,13 +271,49 @@ body {
     touch-action: manipulation;
 }
 
+/* Custom Leaflet Zoom Controls */
+.leaflet-control-zoom {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.leaflet-control-zoom a {
+    width: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+    font-size: 20px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    color: #495057 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+.leaflet-control-zoom a:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+    background: #f8f9fa !important;
+}
+
+.leaflet-control-zoom a:active {
+    transform: scale(0.95) !important;
+}
+
 /* Make zoom controls larger on mobile */
 @media (max-width: 767px) {
     .leaflet-control-zoom a {
-        width: 36px !important;
-        height: 36px !important;
-        line-height: 36px !important;
-        font-size: 20px !important;
+        width: 44px !important;
+        height: 44px !important;
+        line-height: 44px !important;
+        font-size: 18px !important;
     }
     
     .fab {
