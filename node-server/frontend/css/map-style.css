@@ -380,3 +380,44 @@ body {
   z-index: 1000;
 }
 
+.drawing-instructions {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.info-panel {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .info-panel {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .drawing-instructions {
+        left: 10px;
+        right: 10px;
+        transform: none;
+        max-width: none;
+    }
+}
+
+.draw-fab.active {
+    background-color: #ff7800;
+    color: white;
+}
+
+.leaflet-container {
+    cursor: default;
+}

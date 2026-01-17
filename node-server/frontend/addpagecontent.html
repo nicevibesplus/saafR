@@ -1,0 +1,115 @@
+<div class="map-page-container">
+    <div id="map"></div>
+
+    <!-- Drawing Control FABs -->
+    <div class="fab-container-top">
+        <button class="fab draw-fab" id="drawPointBtn" title="Draw Point">
+            <i class="bi bi-pin-map-fill"></i>
+        </button>
+
+        <button class="fab draw-fab" id="drawPolygonBtn" title="Draw Polygon">
+            <i class="bi bi-pentagon-fill"></i>
+        </button>
+
+        <button class="fab" id="darkModeToggleFAB" title="Toggle Dark Mode">
+            <i class="bi bi-moon-fill"></i>
+        </button>
+    </div>
+
+    <!-- Drawing Instructions Panel -->
+    <div class="drawing-instructions d-none" id="drawingControls">
+        <div class="card shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span id="drawingInstructions">Click to draw. Double-click to finish polygon.</span>
+                    </small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-success" id="finishDrawBtn">
+                            <i class="bi bi-check-lg"></i> Finish
+                        </button>
+                        <button class="btn btn-danger" id="cancelDrawBtn">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Input Modal -->
+    <div class="modal fade" id="dataInputModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Anxiety Zone Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dataForm">
+                        <div class="mb-3">
+                            <label class="form-label">Geometry Type</label>
+                            <p class="form-control-plaintext text-muted" id="geometryType">-</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="anxietyName" class="form-label">Name *</label>
+                            <input type="text" class="form-control" id="anxietyName" required 
+                                placeholder="e.g., Highway Interchange">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="anxietySeverity" class="form-label">Severity Level *</label>
+                            <select class="form-select" id="anxietySeverity" required>
+                                <option value="">Select severity...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="extreme">Extreme</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="anxietyCategory" class="form-label">Category *</label>
+                            <select class="form-select" id="anxietyCategory" required>
+                                <option value="">Select category...</option>
+                                <option value="traffic">Heavy Traffic</option>
+                                <option value="complex">Complex Intersection</option>
+                                <option value="speed">High Speed Area</option>
+                                <option value="visibility">Poor Visibility</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="anxietyDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="anxietyDescription" rows="3" 
+                                placeholder="Additional details about this anxiety zone..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="saveDataBtn" class="btn btn-primary">Save to Database</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Panel (optional) -->
+    <div class="info-panel">
+        <div class="card shadow-sm">
+            <div class="card-body p-3">
+                <h6 class="card-title mb-2">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Contribute Data
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    Use the drawing tools to add anxiety zones to our database. 
+                    Click point or polygon tool to start.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
