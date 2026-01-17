@@ -287,6 +287,8 @@ body {
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
+    margin-top: 20px !important;
+    margin-left: 20px !important;
 }
 
 .leaflet-control-zoom a {
@@ -361,6 +363,34 @@ body {
     border-radius: 25px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transition: all 0.2s ease;
+}
+
+/* Start Routing Button (Routing Modal) */
+#routingModal .modal-footer .btn-primary,
+#routeBtn {
+    background: white !important;
+    color: #495057 !important;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#routingModal .modal-footer .btn-primary:hover,
+#routeBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+#routingModal .modal-footer .btn-primary:active,
+#routeBtn:active {
+    transform: scale(0.98);
 }
 
 #layerModal .modal-footer .btn-primary:hover {
