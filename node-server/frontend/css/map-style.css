@@ -109,6 +109,14 @@ body {
     color: rgb(255, 255, 255);
 }
 
+/* Inline variant of FAB for input groups */
+.fab-inline {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    margin-left: 10px; /* breathing room next to input */
+}
+
 /* ========================================
    BOTTOM ROUTING BUTTON
    ======================================== */
@@ -122,27 +130,29 @@ body {
 }
 
 .routing-button {
-    background: #8a1ba9;
-    color: white;
+    background: #ffffff;
+    color: #495057;
     border: none;
-    padding: 14px 32px;
-    border-radius: 50px;
+    padding: 12px 32px;
+    border-radius: 25px;
     font-size: 18px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     cursor: pointer;
 }
 
 .routing-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    color: #343a40;
 }
 
 .routing-button:active {
     transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* "Choose on map" Buttons */
@@ -345,22 +355,26 @@ body {
 }
 
 #layerModal .modal-footer .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #ffffff;
+    color: #495057;
     border: none;
     padding: 12px 32px;
     font-weight: 600;
     border-radius: 25px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
 }
 
 #layerModal .modal-footer .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    color: #343a40;
 }
 
 #layerModal .modal-footer .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .theme-switch {
@@ -442,5 +456,57 @@ body {
   max-height: 250px;
   overflow-y: auto;
   z-index: 1000;
+}
+
+/* ========================================
+   CUSTOM SWITCH COLORS
+   ======================================== */
+
+/* Red switch for accidents */
+.form-check-input.switch-red {
+    background-color: white;
+    border-color: #dc3545;
+}
+
+.form-check-input.switch-red:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.form-check-input.switch-red::before {
+    background-color: #dc3545;
+}
+
+.form-check-input.switch-red:checked::before {
+    background-color: white;
+}
+
+.form-check-input.switch-red:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Yellow switch for anxiety zones */
+.form-check-input.switch-yellow {
+    background-color: white;
+    border-color: #ffc107;
+}
+
+.form-check-input.switch-yellow:checked {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.form-check-input.switch-yellow::before {
+    background-color: #ffc107;
+}
+
+.form-check-input.switch-yellow:checked::before {
+    background-color: white;
+}
+
+.form-check-input.switch-yellow:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
 }
 
