@@ -21,7 +21,13 @@ window.saafr.store = {
 
     getMap: function () {
         if (!this.map) {
-            this.map = L.map("map").setView([51.9607, 7.6261], 13);
+            this.map = L.map("map", {
+                zoomControl: false
+            }).setView([51.9607, 7.6261], 13);
+            
+            L.control.zoom({
+                position: 'topleft'
+            }).addTo(this.map);
         }
         return this.map;
     },

@@ -109,6 +109,14 @@ body {
     color: rgb(255, 255, 255);
 }
 
+/* Inline variant of FAB for input groups */
+.fab-inline {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    margin-left: 10px; /* breathing room next to input */
+}
+
 /* ========================================
    BOTTOM ROUTING BUTTON
    ======================================== */
@@ -122,14 +130,14 @@ body {
 }
 
 .routing-button {
-    background: #8a1ba9;
-    color: white;
+    background: white;
+    color: #495057;
     border: none;
-    padding: 14px 32px;
-    border-radius: 50px;
+    padding: 12px 32px;
+    border-radius: 25px;
     font-size: 18px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -137,12 +145,40 @@ body {
 }
 
 .routing-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .routing-button:active {
+    transform: scale(0.98);
+}
+
+/* "Choose on map" Buttons */
+.btn-pick-map {
+    background: #8a1ba9;
+    color: white;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(138, 27, 169, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn-pick-map:hover {
+    background: #6d1589;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(138, 27, 169, 0.4);
+    color: white;
+}
+
+.btn-pick-map:active {
     transform: translateY(0);
+    background: #5a0f6f;
 }
 
 
@@ -243,13 +279,51 @@ body {
     touch-action: manipulation;
 }
 
+/* Custom Leaflet Zoom Controls */
+.leaflet-control-zoom {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 20px !important;
+    margin-left: 20px !important;
+}
+
+.leaflet-control-zoom a {
+    width: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+    font-size: 20px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    color: #495057 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+.leaflet-control-zoom a:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+    background: #f8f9fa !important;
+}
+
+.leaflet-control-zoom a:active {
+    transform: scale(0.95) !important;
+}
+
 /* Make zoom controls larger on mobile */
 @media (max-width: 767px) {
     .leaflet-control-zoom a {
-        width: 36px !important;
-        height: 36px !important;
-        line-height: 36px !important;
-        font-size: 20px !important;
+        width: 44px !important;
+        height: 44px !important;
+        line-height: 44px !important;
+        font-size: 18px !important;
     }
     
     .fab {
@@ -281,22 +355,54 @@ body {
 }
 
 #layerModal .modal-footer .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #ffffff;
+    color: #495057;
     border: none;
     padding: 12px 32px;
     font-weight: 600;
     border-radius: 25px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+/* Start Routing Button (Routing Modal) */
+#routingModal .modal-footer .btn-primary,
+#routeBtn {
+    background: white !important;
+    color: #495057 !important;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#routingModal .modal-footer .btn-primary:hover,
+#routeBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+#routingModal .modal-footer .btn-primary:active,
+#routeBtn:active {
+    transform: scale(0.98);
 }
 
 #layerModal .modal-footer .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    color: #343a40;
 }
 
 #layerModal .modal-footer .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .theme-switch {
@@ -378,5 +484,57 @@ body {
   max-height: 250px;
   overflow-y: auto;
   z-index: 1000;
+}
+
+/* ========================================
+   CUSTOM SWITCH COLORS
+   ======================================== */
+
+/* Red switch for accidents */
+.form-check-input.switch-red {
+    background-color: white;
+    border-color: #dc3545;
+}
+
+.form-check-input.switch-red:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.form-check-input.switch-red::before {
+    background-color: #dc3545;
+}
+
+.form-check-input.switch-red:checked::before {
+    background-color: white;
+}
+
+.form-check-input.switch-red:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Yellow switch for anxiety zones */
+.form-check-input.switch-yellow {
+    background-color: white;
+    border-color: #ffc107;
+}
+
+.form-check-input.switch-yellow:checked {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.form-check-input.switch-yellow::before {
+    background-color: #ffc107;
+}
+
+.form-check-input.switch-yellow:checked::before {
+    background-color: white;
+}
+
+.form-check-input.switch-yellow:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
 }
 
