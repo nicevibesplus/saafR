@@ -31,17 +31,10 @@
         const response = await fetch("http://localhost:3000/routing_customGH", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                start: start, 
+            body: JSON.stringify({
+                start: start,
                 end: end,
-                points_encoded: false,
-                profile: "bikesafe",
-                instructions: true,
-                include_crashes: true,
-                req_year: new Date().getFullYear(),
-                req_month: new Date().getMonth() + 1,
-                req_hour: new Date().getHours(),
-                req_weekday: new Date().getDay() // 0 = Sunday, 1 = Monday, etc.
+                include_crashes: true
             })
         });
         return await response.json();
