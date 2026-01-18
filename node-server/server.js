@@ -215,6 +215,66 @@ app.post('/route', async (req, res) => {
 
 });
 
+app.post('/routing_customGH', async (req, res) => {
+    try {
+        const { 
+            start, 
+            end, 
+            points_encoded,
+            profile,
+            instructions,
+            include_crashes,
+            req_year,
+            req_month,
+            req_hour,
+            req_weekday
+        } = req.body;
+        
+        const { lat: start_lat, lng: start_lng } = start;
+        const { lat: end_lat, lng: end_lng } = end;
+
+        // Build URL with proper array handling for multiple points
+        const params = new URLSearchParams();
+        params.append('point', `${start_lat},${start_lng}`);
+        params.append('point', `${end_lat},${end_lng}`);
+        params.append('profile', profile);
+        params.append('points_encoded', points_encoded);
+        params.append('instructions', instructions);
+
+        const url = `http://graphhopper:8989/route?${params.toString()}`;
+
+        console.log('Routing URL:', url);
+
+        const route = await fetch(url, {
+            method: 'GET'
+        });
+
+        if (!route.ok) {
+            const errorText = await route.text();
+            console.error('GraphHopper error:', errorText);
+            return res.status(route.status).json({ error: 'GraphHopper error', details: errorText });
+        }
+
+        const answer = await route.json();
+        
+        // Add crash/time metadata if requested
+        if (include_crashes) {
+            answer.metadata = {
+                req_year,
+                req_month,
+                req_hour,
+                req_weekday
+            };
+        }
+        
+        res.json(answer);
+
+    } catch (error) {
+        console.error('Error in routing_customGH:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
 app.post('/routing2', async (req, res) => {
     try {
         const { start, end, avoid_polygon = null } = req.body;
