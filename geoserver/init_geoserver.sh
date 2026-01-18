@@ -7,13 +7,11 @@ if [ -f .env ]; then
     set +a
 fi
 
-# Configuration
-ZIP_FILE="/tmp/upload.zip"
-SOURCE_DIR="/shapefile_source"
+
 STYLE_NAME="roads_style"
-STORE_NAME="roads_file"
-# Note: Layer name usually matches the filename inside the zip
-LAYER_NAME="roads" 
+STORE_NAME="postgis_store"   # Name of the connection in GeoServer
+LAYER_NAME="roads"           # Name of the layer in GeoServer
+TABLE_NAME="roads"           # Actual table name in PostGIS
 SLD_FILE="/roads.sld"
 
 # Helper function to check HTTP status
@@ -50,30 +48,56 @@ else
 fi
 
 # ---------------------------------------------------------
-# 2. Upload Zip / Create Layer (Only if missing)
+# 2. Create PostGIS DataStore (Connection to DB)
 # ---------------------------------------------------------
-# We check if the layer already exists. If yes, we assume the data is there.
-if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME/featuretypes/$LAYER_NAME"; then
-    echo "Layer '$LAYER_NAME' already exists. Skipping data upload."
+if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME"; then
+    echo "DataStore '$STORE_NAME' already exists. Skipping connection setup."
 else
-    echo "Zipping shapefiles..."
-    # -j: Junk paths (flat zip)
-    zip -j $ZIP_FILE $SOURCE_DIR/*.shp $SOURCE_DIR/*.shx $SOURCE_DIR/*.dbf $SOURCE_DIR/*.prj
+    echo "Creating PostGIS DataStore: $STORE_NAME..."
+    
+    # XML payload to connect to PostGIS
+    DATASTORE_XML="<dataStore>
+      <name>$GEOSERVER_STORE</name>
+      <connectionParameters>
+        <entry key=\"host\">$POSTGRES_SERVER</entry>
+        <entry key=\"port\">$POSTGRES_PORT</entry>
+        <entry key=\"database\">$POSTGRES_DB</entry>
+        <entry key=\"user\">$POSTGRES_USER</entry>
+        <entry key=\"passwd\">$POSTGRES_PASSWORD</entry>
+        <entry key=\"dbtype\">postgis</entry>
+        <entry key=\"Expose primary keys\">true</entry>
+      </connectionParameters>
+    </dataStore>"
 
-    if [ ! -f "$ZIP_FILE" ]; then
-        echo "Error: Zip file creation failed."
-        exit 1
-    fi
-
-    echo "Uploading Zip file (Creating Store & Layer)..."
-    curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
-      -H "Content-type: application/zip" \
-      --data-binary @$ZIP_FILE \
-      "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME/file.shp"
+    curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X POST \
+      -H "Content-type: text/xml" \
+      -d "$DATASTORE_XML" \
+      "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores"
 fi
 
 # ---------------------------------------------------------
-# 3. Upload Style (Only if missing)
+# 3. Publish Layer (FeatureType) from Table
+# ---------------------------------------------------------
+if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME/featuretypes/$LAYER_NAME"; then
+    echo "Layer '$LAYER_NAME' already exists. Skipping publishing."
+else
+    echo "Publishing PostGIS Table '$TABLE_NAME' as Layer '$LAYER_NAME'..."
+
+    FEATURETYPE_XML="<featureType>
+      <name>$LAYER_NAME</name>
+      <nativeName>$TABLE_NAME</nativeName>
+      <title>Roads Network</title>
+      <srs>EPSG:4326</srs>
+    </featureType>"
+
+    curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X POST \
+      -H "Content-type: text/xml" \
+      -d "$FEATURETYPE_XML" \
+      "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME/featuretypes"
+fi
+
+# ---------------------------------------------------------
+# 4. Upload Style (Only if missing)
 # ---------------------------------------------------------
 if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/styles/$STYLE_NAME"; then
     echo "Style '$STYLE_NAME' already exists. Skipping upload."
@@ -86,10 +110,8 @@ else
 fi
 
 # ---------------------------------------------------------
-# 4. Link Style to Layer
+# 5. Link Style to Layer
 # ---------------------------------------------------------
-# We run this every time just in case the link was broken or changed, 
-# it is a fast and safe operation.
 echo "Ensuring Layer '$LAYER_NAME' uses style '$STYLE_NAME'..."
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
    -H "Content-type: text/xml" \

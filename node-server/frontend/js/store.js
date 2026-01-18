@@ -129,7 +129,7 @@ window.saafr.store = {
     getRoadNetworkLayer: function () {
         if (!this.layers.roadNetwork[1]) {
             var wmsUrl = "http://localhost:8080/geoserver/wms";
-            var layerName = "roads";
+            var layerName = "saafr:roads";
 
             this.layers.roadNetwork[1] = L.tileLayer.wms(wmsUrl, {
                 layers: layerName,

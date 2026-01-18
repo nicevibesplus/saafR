@@ -17,4 +17,4 @@ FROM
     roads s
 JOIN
     crashes c 
-    ON ST_DWithin(ST_Transform(s.geom, 25832), ST_Transform(c.geom, 25832), 10);
+    ON ST_DWithin(ST_Transform(s.geom, 25832), ST_Transform(c.geom, 25832), 20);
