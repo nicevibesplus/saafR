@@ -219,15 +219,8 @@ app.post('/routing_customGH', async (req, res) => {
     try {
         const { 
             start, 
-            end, 
-            points_encoded,
-            profile,
-            instructions,
+            end,
             include_crashes,
-            req_year,
-            req_month,
-            req_hour,
-            req_weekday
         } = req.body;
         
         const { lat: start_lat, lng: start_lng } = start;
@@ -237,9 +230,17 @@ app.post('/routing_customGH', async (req, res) => {
         const params = new URLSearchParams();
         params.append('point', `${start_lat},${start_lng}`);
         params.append('point', `${end_lat},${end_lng}`);
-        params.append('profile', profile);
-        params.append('points_encoded', points_encoded);
-        params.append('instructions', instructions);
+        params.append('profile', "bikesafe");
+        params.append('points_encoded', false);
+        params.append('instructions', true);
+        params.append('include_crashes', include_crashes);
+        if (include_crashes) {
+            const date = new Date();
+            params.append('req_year', date.getFullYear());
+            params.append('req_month', date.getMonth() + 1);
+            params.append('req_hour', date.getHours());
+            params.append('req_weekday', date.getDay());
+        }
 
         const url = `http://graphhopper:8989/route?${params.toString()}`;
 
@@ -256,16 +257,6 @@ app.post('/routing_customGH', async (req, res) => {
         }
 
         const answer = await route.json();
-        
-        // Add crash/time metadata if requested
-        if (include_crashes) {
-            answer.metadata = {
-                req_year,
-                req_month,
-                req_hour,
-                req_weekday
-            };
-        }
         
         res.json(answer);
 
