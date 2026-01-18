@@ -56,20 +56,19 @@ services:
     restart: unless-stopped
 
   geoserver-init:
-    image: curlimages/curl:latest
+    image: alpine:latest
     depends_on:
       geoserver:
         condition: service_healthy
     volumes:
       - ./geoserver/init_geoserver.sh:/init_geoserver.sh
-      - ./geoserver/streets.sld:/streets.sld:ro
+      - ./geoserver/roads.sld:/roads.sld:ro
+      - ./start_data/roads:/shapefile_source
     env_file:
       - .env
-    entrypoint: [ "/bin/sh", "-c" ]
     command: >
-      "echo 'Waiting for GeoServer...' && 
-       until curl -s -u ${GEOSERVER_USER}:${GEOSERVER_PASSWORD} ${GEOSERVER_REST_URL}/workspaces; do sleep 5; done && 
-       sh /init_geoserver.sh"
+      /bin/sh -c "apk add --no-cache curl zip && 
+      sh /init_geoserver.sh"
 
   graphhopper:
     build: ./graphhopper
