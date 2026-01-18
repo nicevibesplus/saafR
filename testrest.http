@@ -85,4 +85,20 @@ Content-Type: application/json
         ]
     }
 }
+###
+POST http://localhost:3000/routing_customGH
+Content-Type: application/json
+
+{
+    "start": { "lat": 51.95592733851593, "lng": 7.62645680767258 },
+    "end": { "lat": 51.96947351074274, "lng": 7.5956409639675355 },
+    "points_encoded": false,
+    "profile": "bikesafe",
+    "instructions": true,
+    "include_crashes": true,
+    "req_year": 2024,
+    "req_month": 10,
+    "req_hour": 14,
+    "req_weekday": 5
+}
 
