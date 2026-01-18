@@ -28,19 +28,24 @@ check_exists() {
 # ---------------------------------------------------------
 # 0. Wait for GeoServer
 # ---------------------------------------------------------
+echo ""
 echo "Waiting for GeoServer at $GEOSERVER_REST_URL..."
 until curl -s -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" "$GEOSERVER_REST_URL/workspaces"; do
+    echo ""
     echo "GeoServer not ready... sleeping 5s"
     sleep 5
 done
+echo ""
 echo "GeoServer is ready."
 
 # ---------------------------------------------------------
 # 1. Create Workspace (Only if missing)
 # ---------------------------------------------------------
 if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE"; then
+    echo ""
     echo "Workspace '$GEOSERVER_WORKSPACE' already exists. Skipping."
 else
+    echo ""
     echo "Creating Workspace: $GEOSERVER_WORKSPACE..."
     curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml" \
       -d "<workspace><name>$GEOSERVER_WORKSPACE</name></workspace>" \
@@ -51,10 +56,12 @@ fi
 # 2. Create PostGIS DataStore (Connection to DB)
 # ---------------------------------------------------------
 if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME"; then
+    echo ""
     echo "DataStore '$STORE_NAME' already exists. Skipping connection setup."
 else
+    echo ""
     echo "Creating PostGIS DataStore: $STORE_NAME..."
-    
+
     # XML payload to connect to PostGIS
     DATASTORE_XML="<dataStore>
       <name>$GEOSERVER_STORE</name>
@@ -79,8 +86,10 @@ fi
 # 3. Publish Layer (FeatureType) from Table
 # ---------------------------------------------------------
 if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$STORE_NAME/featuretypes/$LAYER_NAME"; then
+    echo ""
     echo "Layer '$LAYER_NAME' already exists. Skipping publishing."
 else
+    echo ""
     echo "Publishing PostGIS Table '$TABLE_NAME' as Layer '$LAYER_NAME'..."
 
     FEATURETYPE_XML="<featureType>
@@ -100,8 +109,10 @@ fi
 # 4. Upload Style (Only if missing)
 # ---------------------------------------------------------
 if check_exists "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/styles/$STYLE_NAME"; then
+    echo ""
     echo "Style '$STYLE_NAME' already exists. Skipping upload."
 else
+    echo ""
     echo "Uploading Style: $STYLE_NAME..."
     curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X POST \
        -H "Content-type: application/vnd.ogc.sld+xml" \
@@ -112,6 +123,7 @@ fi
 # ---------------------------------------------------------
 # 5. Link Style to Layer
 # ---------------------------------------------------------
+echo ""
 echo "Ensuring Layer '$LAYER_NAME' uses style '$STYLE_NAME'..."
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
    -H "Content-type: text/xml" \
@@ -123,4 +135,5 @@ curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
        </layer>" \
    "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/layers/$LAYER_NAME"
 
+echo ""
 echo "Initialization Check Complete."
