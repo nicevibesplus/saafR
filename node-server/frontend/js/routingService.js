@@ -39,7 +39,7 @@
                 instructions: true,
                 include_crashes: true,
                 req_year: new Date().getFullYear(),
-                req_month: new Date().getMonth() + 1, // JavaScript months are 0-indexed
+                req_month: new Date().getMonth() + 1,
                 req_hour: new Date().getHours(),
                 req_weekday: new Date().getDay() // 0 = Sunday, 1 = Monday, etc.
             })
