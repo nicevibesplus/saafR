@@ -2,27 +2,25 @@
 
 # 1. Load variables from .env if the file exists
 if [ -f .env ]; then
-    # 'set -a' automatically exports all variables defined in the source
     set -a
     source .env
     set +a
     echo "Loaded configuration from .env file."
 fi
 
-echo "Creating Workspace: $GEOSERVER_WORKSPACE..."
-curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml" \
-  -d "<workspace><name>$GEOSERVER_WORKSPACE</name></workspace>" \
-  "$GEOSERVER_REST_URL/workspaces"
-
-# ... (Continue with the rest of your curl commands using $DB_HOST, etc.) ...
-
+# ---------------------------------------------------------
 # 1. Create Workspace
+# ---------------------------------------------------------
+echo ""
 echo "Creating Workspace: $GEOSERVER_WORKSPACE..."
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml" \
   -d "<workspace><name>$GEOSERVER_WORKSPACE</name></workspace>" \
   "$GEOSERVER_REST_URL/workspaces"
 
+# ---------------------------------------------------------
 # 2. Create Data Store (Connect to PostGIS)
+# ---------------------------------------------------------
+echo ""
 echo "Creating Data Store connecting to PostGIS..."
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml" \
   -d "<dataStore>
@@ -38,9 +36,12 @@ curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml"
       </dataStore>" \
   "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores"
 
+# ---------------------------------------------------------
 # 3. Publish the Layer
+# ---------------------------------------------------------
 LAYER_NAME="streets"
 
+echo ""
 echo "Publishing Layer: $LAYER_NAME..."
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml" \
   -d "<featureType>
@@ -51,25 +52,25 @@ curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -XPOST -H "Content-type: text/xml"
       </featureType>" \
   "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/datastores/$GEOSERVER_STORE/featuretypes"
 
-echo "GeoServer configuration complete."
-
+# ---------------------------------------------------------
+# 4. Upload & Apply Style
+# ---------------------------------------------------------
 STYLE_NAME="streets_style"
-SLD_FILE="./streets.sld"
+SLD_FILE="/streets.sld"  # Verified: Absolute path is correct
 
-# 4. Upload the SLD File
+echo ""
 echo "Uploading Style: $STYLE_NAME..."
 
-# We use the REST API to create a new style in the workspace
-# Note: We use -T (transfer file) or --data-binary @file
+# Upload the SLD file
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X POST \
    -H "Content-type: application/vnd.ogc.sld+xml" \
    -d @$SLD_FILE \
    "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/styles?name=$STYLE_NAME"
 
-# 5. Apply the Style to the Layer
+echo ""
 echo "Linking Style to Layer..."
 
-# We update the layer definition to set the 'defaultStyle'
+# Apply the style to the layer
 curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
    -H "Content-type: text/xml" \
    -d "<layer>
@@ -80,4 +81,5 @@ curl -u "$GEOSERVER_USER:$GEOSERVER_PASSWORD" -X PUT \
        </layer>" \
    "$GEOSERVER_REST_URL/workspaces/$GEOSERVER_WORKSPACE/layers/$LAYER_NAME"
 
-echo "Style applied successfully."
+echo ""
+echo "GeoServer configuration complete."

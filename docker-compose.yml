@@ -7,14 +7,17 @@ services:
       - "5432:5432"
     volumes:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
-      - ../start_data:/data:ro
+      - ./start_data:/data:ro
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U POSTGRES_USER -d POSTGRES_DB && psql -U POSTGRES_USER -d POSTGRES_DB -tAc 'SELECT 1 FROM crash_road_match LIMIT 1' | grep -q 1"]
-      interval: 60s
-      timeout: 5s 
+      test: [
+        "CMD-SHELL",
+        "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'SELECT 1 FROM crash_road_match LIMIT 1'"
+      ]
+      interval: 10s
+      timeout: 10s
       start_period: 30s
-      retries: 5
+      retries: 30
 
   pgadmin:
     image: dpage/pgadmin4
@@ -36,45 +39,52 @@ services:
     image: docker.osgeo.org/geoserver:2.28.0
     container_name: geoserver
     depends_on:
-      - serviceName: postgis
+      postgis:
         condition: service_healthy
     ports:
       - "8080:8080"
     env_file: .env
     volumes:
-      - geoserver_data/data_dir:/opt/geoserver/data_dir
-      - geoserver_data/ext_dir:/opt/geoserver/ext_dir
+      - geoserver_data:/opt/geoserver/data_dir
+      - geoserver_ext:/opt/geoserver/ext_dir
+    healthcheck:
+      test: "curl --fail --silent --write-out 'HTTP CODE: %{http_code}\n' http://localhost:8080/geoserver/web/ || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
     restart: unless-stopped
 
   geoserver-init:
     image: curlimages/curl:latest
     depends_on:
-      - geoserver
+      geoserver:
+        condition: service_healthy
     volumes:
       - ./geoserver/init_geoserver.sh:/init_geoserver.sh
       - ./geoserver/streets.sld:/streets.sld:ro
     env_file:
       - .env
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: [ "/bin/sh", "-c" ]
     command: >
-      "chmod +x /init_geoserver.sh && 
-       echo 'Waiting for GeoServer...' && 
-       until curl -s -u admin:geoserver http://geoserver:8080/geoserver/rest/workspaces; do sleep 5; done && 
-       /init_geoserver.sh"
+      "echo 'Waiting for GeoServer...' && 
+       until curl -s -u ${GEOSERVER_USER}:${GEOSERVER_PASSWORD} ${GEOSERVER_REST_URL}/workspaces; do sleep 5; done && 
+       sh /init_geoserver.sh"
 
   graphhopper:
     build: ./graphhopper
     depends_on:
-      - serviceName: postgis
-        condition: service_healthy 
+      postgis:
+        condition: service_healthy
     container_name: graphhopper
     ports:
       - 8989:8989
     env_file: .env
     volumes:
-      - ../start_data/data.osm.pbf:/graphhopper/data.osm.pbf
+      - ./start_data/data.osm.pbf:/graphhopper/data.osm.pbf
       - ./graphhopper/config.yml:/graphhopper/config.yml
 
 volumes:
   pg_data:
   geoserver_data:
+  geoserver_ext:
