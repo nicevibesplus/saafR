@@ -7,9 +7,17 @@ services:
       - "5432:5432"
     volumes:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
-      #- ./postgis/data:/var/lib/postgresql/data
-      - ./postgis/crash:/crash:ro
-      - ./postgis/streets:/streets:rw
+      - ./start_data:/data:ro
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'SELECT 1 FROM crash_road_match LIMIT 1'"
+      ]
+      interval: 10s
+      timeout: 10s
+      start_period: 30s
+      retries: 30
 
   pgadmin:
     image: dpage/pgadmin4
@@ -18,7 +26,6 @@ services:
     ports:
       - 15080:80
     volumes:
-      # - ./pgadmin/data:/var/lib/pgadmin/
       - ./pgadmin/servers.json:/pgadmin4/servers.json
 
   node-server:
@@ -31,22 +38,52 @@ services:
   geoserver:
     image: docker.osgeo.org/geoserver:2.28.0
     container_name: geoserver
+    depends_on:
+      postgis:
+        condition: service_healthy
     ports:
       - "8080:8080"
-    environment:
-      - GEOSERVER_DATA_DIR=/opt/geoserver/data_dir
-      - GEOSERVER_EXT_DIR=/opt/geoserver/ext_dir
+    env_file: .env
     volumes:
-      - ./geoserver/data_dir:/opt/geoserver/data_dir
-      - ./geoserver/ext_dir:/opt/geoserver/ext_dir
+      - geoserver_data:/opt/geoserver/data_dir
+      - geoserver_ext:/opt/geoserver/ext_dir
+    healthcheck:
+      test: "curl --fail --silent --write-out 'HTTP CODE: %{http_code}\n' http://localhost:8080/geoserver/web/ || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
     restart: unless-stopped
+
+  geoserver-init:
+    image: alpine:latest
+    depends_on:
+      geoserver:
+        condition: service_healthy
+    volumes:
+      - ./geoserver/init_geoserver.sh:/init_geoserver.sh
+      - ./geoserver/roads.sld:/roads.sld:ro
+      - ./start_data/roads:/shapefile_source
+    env_file:
+      - .env
+    command: >
+      /bin/sh -c "apk add --no-cache curl zip && 
+      sh /init_geoserver.sh"
 
   graphhopper:
     build: ./graphhopper
+    depends_on:
+      postgis:
+        condition: service_healthy
     container_name: graphhopper
     ports:
       - 8989:8989
     env_file: .env
     volumes:
-      - ./graphhopper/data.osm.pbf:/graphhopper/data.osm.pbf  # Persist the graph data
-      - ./graphhopper/config.yml:/graphhopper/config.yml  # Custom configuration
+      - ./start_data/data.osm.pbf:/graphhopper/data.osm.pbf
+      - ./graphhopper/config.yml:/graphhopper/config.yml
+
+volumes:
+  pg_data:
+  geoserver_data:
+  geoserver_ext:
