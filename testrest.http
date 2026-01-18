@@ -90,8 +90,8 @@ POST http://localhost:3000/routing_customGH
 Content-Type: application/json
 
 {
-    "start": { "lat": 51.95592733851593, "lng": 7.62645680767258 },
-    "end": { "lat": 51.96947351074274, "lng": 7.5956409639675355 },
+    "start": { "lat": 51.95378588463088, "lng": 7.62645686150550333119130767258 },
+    "end": { "lat": 51.9694735196802756453007074274, "lng": 7.560118757659227956409639675355 },
     "points_encoded": false,
     "profile": "bikesafe",
     "instructions": true,
