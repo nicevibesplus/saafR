@@ -33,12 +33,24 @@ window.renderPage = async function () {
 
 
     const darkModeSwitch = document.getElementById("darkModeSwitch");
-    darkModeSwitch.addEventListener("change", function () {
+    darkModeSwitch.addEventListener("click", function () {
+        const isActive = this.classList.contains("active");
+        const icon = this.querySelector("i");
         window.saafr.store.map.removeLayer(window.saafr.store.getActiveBase());
-        window.saafr.store.setDarkMode(this.checked);
+        window.saafr.store.setDarkMode(!isActive);
         var layer = window.saafr.store.getActiveBase();
         window.saafr.store.map.addLayer(layer);
         layer.bringToBack();
+        this.classList.toggle("active");
+        
+        // Toggle icon between sun and moon
+        if (icon.classList.contains("bi-sun-fill")) {
+            icon.classList.remove("bi-sun-fill");
+            icon.classList.add("bi-moon-fill");
+        } else {
+            icon.classList.remove("bi-moon-fill");
+            icon.classList.add("bi-sun-fill");
+        }
     });
 
     const accidentSwitch = document.getElementById("toggleAccidents");
@@ -56,14 +68,16 @@ window.renderPage = async function () {
     });
 
     const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
-    roadNetworkSwitch.addEventListener("change", function () {
+    roadNetworkSwitch.addEventListener("click", function () {
+        const willBeActive = !this.classList.contains("active");
         if (window.saafr.store.isRoadNetworkLayerVisible()) {
             window.saafr.store.map.removeLayer(window.saafr.store.getRoadNetworkLayer());
         }
-        window.saafr.store.setRoadNetworkLayerVisibility(!window.saafr.store.isRoadNetworkLayerVisible());
-        if (window.saafr.store.isRoadNetworkLayerVisible()) {
+        window.saafr.store.setRoadNetworkLayerVisibility(willBeActive);
+        if (willBeActive) {
             window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
         }
+        this.classList.toggle("active");
     });
 
     //window.saafr.map.initLayerToggles(window.saafr.store);
