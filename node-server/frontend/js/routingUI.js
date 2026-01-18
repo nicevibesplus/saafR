@@ -83,7 +83,7 @@ and zooms to the calculated route
                 alert("Start or destination could not be found. Use lat, lng, or an address such as Prinzipalmarkt 10 Münster.");
                 return;
             }
-
+            console.log(start)
             const data = await window.saafr.routing.requestRoute(start, end);
             console.log(data);
             const path = data.paths[0];

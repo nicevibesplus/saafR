@@ -28,10 +28,21 @@
     };
 
     window.saafr.routing.requestRoute = async function (start, end) {
-        const response = await fetch("http://localhost:3000/route", {
+        const response = await fetch("http://localhost:3000/routing_customGH", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ start: start, end: end, useCrashModel: true })
+            body: JSON.stringify({ 
+                start: start, 
+                end: end,
+                points_encoded: false,
+                profile: "bikesafe",
+                instructions: true,
+                include_crashes: true,
+                req_year: new Date().getFullYear(),
+                req_month: new Date().getMonth() + 1, // JavaScript months are 0-indexed
+                req_hour: new Date().getHours(),
+                req_weekday: new Date().getDay() // 0 = Sunday, 1 = Monday, etc.
+            })
         });
         return await response.json();
     };
