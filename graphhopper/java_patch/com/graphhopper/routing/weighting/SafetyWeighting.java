@@ -4,6 +4,8 @@ import com.graphhopper.routing.ev.DecimalEncodedValue;
 import com.graphhopper.routing.ev.VehicleSpeed;
 import com.graphhopper.routing.ev.VehiclePriority;
 import com.graphhopper.routing.ev.IntEncodedValue;
+import com.graphhopper.routing.ev.BooleanEncodedValue;
+import com.graphhopper.routing.ev.VehicleAccess;
 import com.graphhopper.routing.weighting.TurnCostProvider;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.weighting.AccidentData;     // Deine Datenklasse
@@ -11,6 +13,7 @@ import com.graphhopper.routing.weighting.AccidentRegistry; // Deine Registry
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.PMap;
+import com.graphhopper.routing.weighting.custom.CustomWeighting;
 
 import java.util.logging.Logger;
 import java.util.List;
@@ -21,14 +24,11 @@ import java.time.temporal.ChronoUnit;
 public class SafetyWeighting implements Weighting {
     private static final Logger LOGGER = Logger.getLogger(SafetyWeighting.class.getName());
 
+    private final CustomWeighting delegate;
     
-    private final DecimalEncodedValue speedEnc;
-    private final DecimalEncodedValue priorityEnc;
-    private final TurnCostProvider turnCostProvider;
-    private final BaseGraph graph;
-
     private final IntEncodedValue osmIdEnc;
     private final Map<Long, List<AccidentData>> accidents;
+    
     
     private final boolean includeCrashes;
     private final int reqYear;
@@ -36,41 +36,18 @@ public class SafetyWeighting implements Weighting {
     private final int reqDay;  
     private final int reqHour;
 
-    public SafetyWeighting(EncodingManager encodingManager, TurnCostProvider turnCostProvider, PMap hints, BaseGraph graph) {
-        // 1. Initialisiere Standard-Komponenten
-        this.turnCostProvider = turnCostProvider;
-        this.graph = graph;
-        String vehicle = hints.getString("vehicle", "");
-        
-        if (vehicle.isEmpty()) {
-            // Prüfen, ob es ein verschachteltes 'hints' Objekt gibt
-            Object nestedObj = hints.getObject("hints", null);
-            if (nestedObj instanceof Map) {
-                PMap nested = new PMap((Map) nestedObj);
-                vehicle = nested.getString("vehicle", "car");
-            } else {
-                // Nichts gefunden, Fallback auf car
-                vehicle = "car";
-            }
-        }
-        
-        LOGGER.info("SafetyWeighting initialisiert für Fahrzeug: " + vehicle);
-        this.speedEnc = encodingManager.getDecimalEncodedValue(VehicleSpeed.key(vehicle));
-        
-        // --- NEU: Wir holen uns die Priorität für das Fahrzeug (z.B. bike_priority) ---
-        this.priorityEnc = encodingManager.getDecimalEncodedValue(VehiclePriority.key(vehicle));
-        
-        // 2. Initialisiere Custom-Komponenten (OSM ID)
+    public SafetyWeighting(TurnCostProvider turnCostProvider, CustomWeighting.Parameters parameters, PMap hints, EncodingManager encodingManager) {
+        this.delegate = new CustomWeighting(turnCostProvider, parameters);
+
+        // 2. OSM ID holen
         if (encodingManager.hasEncodedValue("osm_way_id")) {
             this.osmIdEnc = encodingManager.getIntEncodedValue("osm_way_id");
         } else {
             this.osmIdEnc = null;
         }
-
-        this.accidents = AccidentRegistry.getInstance(); 
         
+        this.accidents = AccidentRegistry.getInstance(); 
         LOGGER.info("SafetyWeighting hints: " + hints.toString());
-        // 3. Request Parameter laden
         this.includeCrashes = hints.getBool("include_crashes", false);
         this.reqYear = hints.getInt("req_year", -1);
         this.reqMonth = hints.getInt("req_month", -1);
@@ -86,38 +63,12 @@ public class SafetyWeighting implements Weighting {
     }
 
     @Override
-    public double calcMinWeightPerDistance() {
-        return 1.0 / speedEnc.getMaxStorableDecimal();
-    }
-
-    @Override
     public double calcEdgeWeight(EdgeIteratorState edgeState, boolean reverse) {
-        if (speedEnc == null) return Double.POSITIVE_INFINITY;
-        double speed = edgeState.get(speedEnc);
-        if (speed == 0) return Double.POSITIVE_INFINITY;
-
-        // 2. Priority Check (DAS LÖST DEIN PROBLEM)
-        // priority ist ein Wert zwischen 0 und 1.
-        // 1.0 = Perfekter Radweg
-        // 0.1 = Autobahnzubringer / Schlechter Belag
-        // 0.0 = Verboten / Sackgasse / Einbahnstraße falsch herum
-        double priority = edgeState.get(priorityEnc);
-        if (priority == 0) return Double.POSITIVE_INFINITY; // Absolut verboten!
-
-        // Berechnung: Zeit / Priorität
-        // Eine Strecke mit Prio 0.5 zählt doppelt so schwer wie normal.
-        double time = edgeState.getDistance() / speed;
-        double baseWeight = time / priority;
-
-        // 3. Turn Costs
-        double turnCosts = 0;
-        if (turnCostProvider != null) {
-             turnCosts = turnCostProvider.calcTurnWeight(edgeState.getEdge(), edgeState.getBaseNode(), edgeState.getAdjNode());
+        double weight = delegate.calcEdgeWeight(edgeState, reverse);
+        if ( Double.isInfinite(weight) ) {
+            return Double.POSITIVE_INFINITY;
         }
-        
-        double weight = baseWeight + turnCosts;
 
-        // 4. Unfall Logik
         if (!includeCrashes || accidents == null || osmIdEnc == null) {
             return weight;
         }
@@ -224,34 +175,33 @@ public class SafetyWeighting implements Weighting {
         return returnWeight;
     }
 
+    @Override
+    public double calcMinWeightPerDistance() {
+        return delegate.calcMinWeightPerDistance();
+    }
 
     @Override
     public long calcEdgeMillis(EdgeIteratorState edgeState, boolean reverse) {
-        if (speedEnc == null) return 0;
-        double speed = edgeState.get(speedEnc);
-        if (speed == 0) return 0;
-        return (long) (edgeState.getDistance() / speed * 1000);
+        return delegate.calcEdgeMillis(edgeState, reverse);
     }
 
     @Override
     public double calcTurnWeight(int edgeFrom, int nodeVia, int edgeTo) {
-        // Delegation an den Provider
-        return turnCostProvider.calcTurnWeight(edgeFrom, nodeVia, edgeTo);
+        return delegate.calcTurnWeight(edgeFrom, nodeVia, edgeTo);
     }
 
     @Override
     public long calcTurnMillis(int inEdge, int viaNode, int outEdge) {
-        return turnCostProvider.calcTurnMillis(inEdge, viaNode, outEdge);
+        return delegate.calcTurnMillis(inEdge, viaNode, outEdge);
     }
 
     @Override
     public boolean hasTurnCosts() {
-        return turnCostProvider != null 
-            && turnCostProvider != TurnCostProvider.NO_TURN_COST_PROVIDER;
+        return delegate.hasTurnCosts();
     }
 
     @Override
     public String getName() {
-        return "safety";
+        return "safety"; // Eigener Name
     }
 }

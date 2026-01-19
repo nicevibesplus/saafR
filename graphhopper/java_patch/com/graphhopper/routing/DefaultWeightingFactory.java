@@ -75,8 +75,7 @@ public class DefaultWeightingFactory implements WeightingFactory {
             }
 
             if ("bikesafe".equals(profile.getName())) {
-                // Wenn ja: Ignoriere CustomWeighting, nimm SafetyWeighting!
-                return new SafetyWeighting(encodingManager, turnCostProvider, hints, graph);
+                return new SafetyWeighting(turnCostProvider, parameters, hints, encodingManager);
             }
 
             if (hints.has("cm_version") && hints.getString("cm_version", "").equals("2")) {
