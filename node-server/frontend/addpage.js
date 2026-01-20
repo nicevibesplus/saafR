@@ -239,7 +239,6 @@ window.renderPage = async function () {
       
       // Collect form data
       const formData = {
-          class: parseInt(document.getElementById('anxietyClass').value),
           severity: parseInt(document.getElementById('anxietySeverity').value),
           active_days: activeDays,
           active_time_start: document.getElementById('timeStart').value || null,
