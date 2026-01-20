@@ -30,15 +30,193 @@ window.renderPage = async function () {
     // Add drawn items layer to map
     map.addLayer(window.addPageStore.drawnItems);
 
-    // Add WMS anxiety zones layer
-    const anxietyWMS = L.tileLayer.wms('YOUR_WMS_URL_HERE', {
-        layers: 'anxiety_zones',
-        format: 'image/png',
-        transparent: true,
-        attribution: 'Anxiety Zones Data'
-    });
-    map.addLayer(anxietyWMS);
-    window.addPageStore.anxietyLayer = anxietyWMS;
+    // Add WFS anxiety zones layer
+    async function loadAnxietyZones() {
+        try {
+            const response = await fetch('YOUR_WFS_ENDPOINT_OR_API_HERE');
+            const geojsonData = await response.json();
+            
+            const anxietyLayer = L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    return {
+                        color: '#ffc107',
+                        weight: 2,
+                        fillOpacity: 0.4
+                    };
+                },
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: '#ffc107',
+                        color: '#000',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.6
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    // Make each feature clickable
+                    layer.on('click', function(e) {
+                        showAnxietyZonePopup(feature, layer);
+                    });
+                }
+            });
+            
+            anxietyLayer.addTo(map);
+            window.addPageStore.anxietyLayer = anxietyLayer;
+            
+        } catch (error) {
+            console.error('Error loading anxiety zones:', error);
+        }
+    }
+
+    // Load anxiety zones on page load
+    loadAnxietyZones();
+
+    function showAnxietyZonePopup(feature, layer) {
+        const props = feature.properties;
+        
+        // Build trigger tags display
+        const triggers = props.trigger_type ? props.trigger_type.split(',') : [];
+        const triggersHTML = triggers.map(t => 
+            `<span class="badge bg-primary me-1 mb-1">${t.trim()}</span>`
+        ).join('');
+        
+        // Build active days display
+        const days = props.active_days || [];
+        const daysHTML = days.length === 7 ? 
+            '<span class="text-muted">All days</span>' : 
+            days.join(', ');
+        
+        // Build time display
+        const timeHTML = (!props.active_time_start && !props.active_time_end) ?
+            '<span class="text-muted">All day</span>' :
+            `${props.active_time_start || '00:00'} - ${props.active_time_end || '23:59'}`;
+        
+        // Severity label
+        const severityLabels = {
+            1: 'Very Low',
+            2: 'Low',
+            3: 'Medium',
+            4: 'High',
+            5: 'Very High'
+        };
+        
+        // Lighting label
+        const lightingLabels = {
+            1: 'Poor',
+            2: 'Moderate',
+            3: 'Good'
+        };
+        
+        const popupContent = `
+            <div class="anxiety-popup" style="min-width: 280px;">
+                <h6 class="mb-2 pb-2 border-bottom">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Anxiety Zone
+                </h6>
+                
+                <div class="mb-2">
+                    <strong>Severity:</strong> 
+                    <span class="badge bg-warning">${severityLabels[props.severity] || props.severity}</span>
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Location Type:</strong> ${props.location_type || 'N/A'}
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Triggers:</strong><br>
+                    ${triggersHTML || '<span class="text-muted">None specified</span>'}
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Active:</strong> ${daysHTML}
+                    ${props.active_time_start ? `<br><small class="text-muted">${timeHTML}</small>` : ''}
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Lighting:</strong> ${lightingLabels[props.lighting] || props.lighting}
+                </div>
+                
+                ${props.remark ? `
+                    <div class="mb-2">
+                        <strong>Remarks:</strong><br>
+                        <small class="text-muted">${props.remark}</small>
+                    </div>
+                ` : ''}
+                
+                <hr class="my-2">
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Community Rating:</strong>
+                        <span class="ms-2 badge ${props.likes >= 0 ? 'bg-success' : 'bg-danger'}" id="likesDisplay-${props.id}">
+                            ${props.likes || 0}
+                        </span>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-success" onclick="updateLikes(${props.id}, 1, this)">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="updateLikes(${props.id}, -1, this)">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        layer.bindPopup(popupContent, {
+            maxWidth: 350,
+            className: 'anxiety-zone-popup'
+        }).openPopup();
+    }
+
+
+    // Like/Dislike Handler
+    window.updateLikes = async function(zoneId, delta, buttonElement) {
+        // Disable button during request
+        buttonElement.disabled = true;
+        
+        try {
+            const response = await fetch(`YOUR_API_ENDPOINT/anxiety-zones/${zoneId}/like`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delta: delta }) // +1 or -1
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Update the display immediately
+                const likesDisplay = document.getElementById(`likesDisplay-${zoneId}`);
+                if (likesDisplay) {
+                    likesDisplay.textContent = data.newLikes;
+                    
+                    // Update badge color
+                    likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
+                }
+                
+                // Visual feedback - briefly highlight the button
+                buttonElement.classList.add('active');
+                setTimeout(() => {
+                    buttonElement.classList.remove('active');
+                    buttonElement.disabled = false;
+                }, 300);
+                
+            } else {
+                alert('Error updating rating. Please try again.');
+                buttonElement.disabled = false;
+            }
+            
+        } catch (error) {
+            console.error('Error updating likes:', error);
+            alert('Network error. Please check your connection.');
+            buttonElement.disabled = false;
+        }
+    };
+
 
     // Initialize mobile guards
     if (window.saafr && window.saafr.ui && window.saafr.ui.initMobileGuards) {

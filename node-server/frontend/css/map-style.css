@@ -582,3 +582,22 @@ body {
             font-size: 0.8rem;
         }
     }
+
+
+    /* Anxiety Zone Popup Styling */
+    .anxiety-zone-popup .leaflet-popup-content {
+        margin: 12px 14px;
+    }
+
+    .anxiety-zone-popup .badge {
+        font-size: 0.75rem;
+    }
+
+    .anxiety-zone-popup .btn-group button {
+        padding: 4px 10px;
+    }
+
+    .anxiety-zone-popup .btn-group button.active {
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+    }
