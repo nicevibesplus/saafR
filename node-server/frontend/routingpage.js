@@ -42,7 +42,7 @@ window.renderPage = async function () {
         window.saafr.store.map.addLayer(layer);
         layer.bringToBack();
         this.classList.toggle("active");
-        
+
         // Toggle icon between sun and moon
         if (icon.classList.contains("bi-sun-fill")) {
             icon.classList.remove("bi-sun-fill");
@@ -82,8 +82,8 @@ window.renderPage = async function () {
 
     //window.saafr.map.initLayerToggles(window.saafr.store);
 };
-
 window.unmountPage = function () {
+    // 1. Layer Modal aufräumen
     const layerModalEl = document.getElementById("layerModal");
     if (layerModalEl) {
         const inst = bootstrap.Modal.getInstance(layerModalEl);
@@ -91,8 +91,10 @@ window.unmountPage = function () {
             inst.hide();
             inst.dispose();
         }
+        layerModalEl.remove(); // WICHTIG: Element aus dem Body entfernen
     }
 
+    // 2. Routing Modal aufräumen
     const routingModalEl = document.getElementById("routingModal");
     if (routingModalEl) {
         const inst = bootstrap.Modal.getInstance(routingModalEl);
@@ -100,16 +102,19 @@ window.unmountPage = function () {
             inst.hide();
             inst.dispose();
         }
+        routingModalEl.remove(); // WICHTIG: Element aus dem Body entfernen
     }
 
+    // 3. Modal-Backdrops entfernen (falls welche hängen geblieben sind)
     document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
     document.body.classList.remove("modal-open");
     document.body.style.removeProperty("padding-right");
 
-    if (window.routingStore && window.routingStore.map) {
-        window.routingStore.map.remove();
-        window.routingStore.map = null;
+    // 4. KARTE ENTFERNEN (Der Hauptfehler)
+    // Hier stand vorher "window.routingStore", das existiert aber nicht.
+    // Es muss "window.saafr.store" heißen.
+    if (window.saafr && window.saafr.store && window.saafr.store.map) {
+        window.saafr.store.map.remove(); // Zerstört die Leaflet-Instanz
+        window.saafr.store.map = null;   // Setzt die Referenz im Store auf null
     }
-
-    window.routingStore = null;
 };
