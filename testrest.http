@@ -1,4 +1,4 @@
-GET http://localhost:3000/anxiety_areas
+GET http://localhost:3000/get_anxiety_areas
 
 
 ###
