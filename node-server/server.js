@@ -378,25 +378,25 @@ app.post("/upload-anxiety-areas", async (req, res) => {
 
 
     const values = [
-        name,                      // $1
-        reason || null,             // $2
-        approved ?? false,          // $3
-        active_time_start || null,  // $4
-        active_time_end || null,    // $5
-        JSON.stringify(geometry),   // $6  <<< WICHTIG
-        active_days || null,        // $7
-        lighting || null,           // $8
-        likes || 0,                 // $9
-        location_type || null,      // $10
-        remark || null,             // $11
-        severity || null,           // $12
-        trigger_type || null        // $13
+        name,               
+        reason || null,          
+        approved ?? false,          
+        active_time_start || null,  
+        active_time_end || null,    
+        JSON.stringify(geometry),   
+        active_days || null,        
+        lighting || null,          
+        likes || 0,                 
+        location_type || null,      
+        remark || null,             
+        severity || null,          
+        trigger_type || null        
     ];
 
 
     const result = await pool.query(query, values);
 
-    res.status(201).json({ success: true, data: result.rows[0], message: "Data uploaded to db." });
+    res.status(200).json({ success: true, data: result.rows[0], message: "Data uploaded to db." });
 
   } catch (error) {
     console.error(error);
