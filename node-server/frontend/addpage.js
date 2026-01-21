@@ -445,22 +445,22 @@ window.renderPage = async function () {
       }
       
       console.log('Data to save:', formData);
-      
+      console.log(JSON.stringify(formData));
       // TODO: Send to PostGIS database
       // Example:
-      // try {
-      //     const response = await fetch('YOUR_API_ENDPOINT', {
-      //         method: 'POST',
-      //         headers: { 'Content-Type': 'application/json' },
-      //         body: JSON.stringify(formData)
-      //     });
-      //     if (response.ok) {
-      //         alert('Data saved successfully!');
-      //     }
-      // } catch (error) {
-      //     console.error('Save error:', error);
-      //     alert('Error saving data. Check console.');
-      // }
+      try {
+          const response = await fetch('/upload-anxiety-areas', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+          });
+          if (response.ok) {
+              alert('Data saved successfully!');
+          }
+      } catch (error) {
+          console.error('Save error:', error);
+          alert('Error saving data. Check console.');
+      }
       
       // Close modal
       bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();

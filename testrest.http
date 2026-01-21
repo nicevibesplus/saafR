@@ -102,3 +102,20 @@ Content-Type: application/json
     "req_weekday": 5
 }
 
+###
+
+POST http://localhost:3000/upload-anxiety-areas
+Content-Type: application/json
+
+{"severity":3,
+"active_days":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+"active_time_start":null,
+"active_time_end":null,
+"location_type":"Street",
+"trigger_type":"Complex Navigation",
+"lighting":2,
+"remark":"",
+"likes":0,
+"geometry":{"type":"Point","coordinates":[7.642364501953126,51.96933645806147]}}
+
+

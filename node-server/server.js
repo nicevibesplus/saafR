@@ -325,6 +325,85 @@ app.post('/routing2', async (req, res) => {
     }
 });
 
+app.post("/upload-anxiety-areas", async (req, res) => {
+  try {
+    const {
+      active_time_start,
+      active_time_end,
+      active_days,
+      lighting,
+      likes,
+      location_type,
+      remark,
+      severity,
+      trigger_type,
+      geometry
+    } = req.body;
+
+    const name = "das"
+    const approved = false
+    const reason = "dasd"
+
+    console.log("Received anxiety area data:", req.body);
+
+    const geomWKT = geometry && geometry.lat != null && geometry.lng != null
+        ? `POINT(${geometry.lng} ${geometry.lat})`
+        : null;
+
+    const query = `
+        INSERT INTO anxiety_areas
+        (
+            name,
+            reason,
+            approved,
+            start_time,
+            end_time,
+            geometry,
+            active_days,
+            lighting,
+            likes,
+            location_type,
+            remark,
+            severity,
+            trigger_type
+        )
+        VALUES
+        (
+            $1, $2, $3, $4, $5,
+            ST_SetSRID(ST_GeomFromGeoJSON($6), 4326),
+            $7, $8, $9, $10, $11, $12, $13
+        )
+        RETURNING *;
+        `;
+
+
+    const values = [
+        name,                      // $1
+        reason || null,             // $2
+        approved ?? false,          // $3
+        active_time_start || null,  // $4
+        active_time_end || null,    // $5
+        JSON.stringify(geometry),   // $6  <<< WICHTIG
+        active_days || null,        // $7
+        lighting || null,           // $8
+        likes || 0,                 // $9
+        location_type || null,      // $10
+        remark || null,             // $11
+        severity || null,           // $12
+        trigger_type || null        // $13
+    ];
+
+
+    const result = await pool.query(query, values);
+
+    res.status(201).json({ success: true, data: result.rows[0], message: "Data uploaded to db." });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 
 
 
