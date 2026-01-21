@@ -11,44 +11,50 @@
       <FeatureTypeStyle>
         <Rule>
           <Name>Crash Count Buckets</Name>
-          <LineSymbolizer>
+          <LineSymbolizer uom="http://www.opengeospatial.org/se/units/metre">
             <Stroke>
               <CssParameter name="stroke">
                 <ogc:Function name="Categorize">
                   <ogc:PropertyName>crash_count</ogc:PropertyName>
 
-                  <ogc:Literal>#1a9641</ogc:Literal>
+                  <ogc:Literal>#e0e0e0</ogc:Literal>
                   <ogc:Literal>5</ogc:Literal>
 
-                  <ogc:Literal>#56b055</ogc:Literal>
+                  <ogc:Literal>#9e9e9e</ogc:Literal>
                   <ogc:Literal>10</ogc:Literal>
 
-                  <ogc:Literal>#92cb69</ogc:Literal>
+                  <ogc:Literal>#ffee58</ogc:Literal>
                   <ogc:Literal>15</ogc:Literal>
 
-                  <ogc:Literal>#cce67d</ogc:Literal>
+                  <ogc:Literal>#fbc02d</ogc:Literal>
                   <ogc:Literal>20</ogc:Literal>
 
-                  <ogc:Literal>#ffffbf</ogc:Literal>
+                  <ogc:Literal>#fb8c00</ogc:Literal>
                   <ogc:Literal>25</ogc:Literal>
 
-                  <ogc:Literal>#fed586</ogc:Literal>
+                  <ogc:Literal>#f4511e</ogc:Literal>
                   <ogc:Literal>30</ogc:Literal>
 
-                  <ogc:Literal>#fdae61</ogc:Literal>
+                  <ogc:Literal>#d32f2f</ogc:Literal>
                   <ogc:Literal>35</ogc:Literal>
 
-                  <ogc:Literal>#f46d43</ogc:Literal>
+                  <ogc:Literal>#b71c1c</ogc:Literal>
                   <ogc:Literal>40</ogc:Literal>
 
-                  <ogc:Literal>#d53e4f</ogc:Literal>
-                  <ogc:Literal>45</ogc:Literal>
-
-                  <ogc:Literal>#d7191c</ogc:Literal>
-
+                  <ogc:Literal>#500000</ogc:Literal>
                 </ogc:Function>
               </CssParameter>
-              <CssParameter name="stroke-width">1</CssParameter>
+              <CssParameter name="stroke-opacity">
+                <ogc:Function name="Interpolate">
+                  <ogc:PropertyName>crash_count</ogc:PropertyName>
+                  <ogc:Literal>0</ogc:Literal>
+                  <ogc:Literal>0.4</ogc:Literal>
+
+                  <ogc:Literal>40</ogc:Literal>
+                  <ogc:Literal>1.0</ogc:Literal>
+                </ogc:Function>
+              </CssParameter>
+              <CssParameter name="stroke-width">5</CssParameter>
               <CssParameter name="stroke-linejoin">bevel</CssParameter>
               <CssParameter name="stroke-linecap">square</CssParameter>
             </Stroke>
