@@ -10,10 +10,7 @@ services:
       - ./start_data:/data:ro
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: [
-        "CMD-SHELL",
-        "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'SELECT 1 FROM crash_road_match LIMIT 1'"
-      ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM information_schema.tables WHERE table_name = 'crash_road_match'\" | grep -q 1 && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM crash_road_match LIMIT 1\" | grep -q 1" ]
       interval: 30s
       timeout: 10s
       start_period: 30s
@@ -48,7 +45,9 @@ services:
       - geoserver_data:/opt/geoserver/data_dir
       - geoserver_ext:/opt/geoserver/ext_dir
     healthcheck:
-      test: "curl --fail --silent --write-out 'HTTP CODE: %{http_code}\n' http://localhost:8080/geoserver/web/ || exit 1"
+      test: "curl --fail --silent --write-out 'HTTP CODE: %{http_code}
+
+        ' http://localhost:8080/geoserver/web/ || exit 1"
       interval: 10s
       timeout: 10s
       retries: 30
@@ -67,8 +66,7 @@ services:
     env_file:
       - .env
     command: >
-      /bin/sh -c "apk add --no-cache curl zip && 
-      sh /init_geoserver.sh"
+      /bin/sh -c "apk add --no-cache curl zip &&  sh /init_geoserver.sh"
 
   graphhopper:
     build: ./graphhopper
