@@ -538,3 +538,224 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
 }
 
+.drawing-instructions {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.info-panel {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .info-panel {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .drawing-instructions {
+        left: 10px;
+        right: 10px;
+        transform: none;
+        max-width: none;
+    }
+}
+
+.draw-fab.active {
+    background-color: #ff7800;
+    color: white;
+}
+
+.leaflet-container {
+    cursor: default;
+}
+
+/* Time Controls Opacity Based on Always Active Checkbox */
+#timeControls {
+    transition: opacity 0.2s ease;
+}
+
+#alwaysActive:checked ~ div #timeControls,
+.form-check:has(#alwaysActive:checked) ~ #timeControls {
+    opacity: 0.4;
+}
+
+#alwaysActive:not(:checked) ~ #timeControls {
+    opacity: 1;
+}
+
+
+/* Severity Slider - Yellow to Red Gradient */
+.severity-slider {
+    background: linear-gradient(to right, 
+        #ffd700 0%,      /* Gold/Yellow - Low */
+        #ffa500 25%,     /* Orange */
+        #ff8c00 50%,     /* Dark Orange - Medium */
+        #ff4500 75%,     /* Orange Red */
+        #dc143c 100%     /* Crimson - High */
+    );
+    height: 8px;
+    border-radius: 5px;
+}
+
+.severity-slider::-webkit-slider-thumb {
+    background: white;
+    border: 2px solid #333;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.severity-slider::-moz-range-thumb {
+    background: white;
+    border: 2px solid #333;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Lighting Slider - Black to Light Gray Gradient */
+.lighting-slider {
+    background: linear-gradient(to right, 
+        #1a1a1a 0%,      /* Almost Black - Poor */
+        #808080 50%,     /* Medium Gray - Moderate */
+        #d3d3d3 100%     /* Light Gray - Good */
+    );
+    height: 8px;
+    border-radius: 5px;
+}
+
+.lighting-slider::-webkit-slider-thumb {
+    background: white;
+    border: 2px solid #333;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.lighting-slider::-moz-range-thumb {
+    background: white;
+    border: 2px solid #333;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+/* Trigger Type Tag Selection */
+    .tag-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+    }
+
+    .tag-btn {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tag-btn:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+    }
+
+    .tag-btn.active {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    /* Selected Tags Display */
+    .selected-tags-container {
+        min-height: 38px;
+        padding: 6px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        background: #f8f9fa;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .selected-tags-container:empty::before {
+        content: "No triggers selected yet...";
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: #0d6efd;
+        color: white;
+        border-radius: 15px;
+        font-size: 0.875rem;
+    }
+
+    .selected-tag .remove-tag {
+        cursor: pointer;
+        font-weight: bold;
+        padding: 0 4px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .selected-tag .remove-tag:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 576px) {
+        .tag-selection-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        }
+        
+        .tag-btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+    }
+
+
+    /* Anxiety Zone Popup Styling */
+    .anxiety-zone-popup .leaflet-popup-content {
+        margin: 12px 14px;
+    }
+
+    .anxiety-zone-popup .badge {
+        font-size: 0.75rem;
+    }
+
+    .anxiety-zone-popup .btn-group button {
+        padding: 4px 10px;
+    }
+
+    .anxiety-zone-popup .btn-group button.active {
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+    }

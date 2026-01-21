@@ -1,0 +1,307 @@
+<div class="map-page-container">
+    <div id="map"></div>
+
+    <!-- Drawing Control FABs -->
+    <div class="fab-container-top">
+        <button class="fab draw-fab" id="drawPointBtn" title="Draw Point">
+            <i class="bi bi-pin-map-fill"></i>
+        </button>
+
+        <button class="fab draw-fab" id="drawPolygonBtn" title="Draw Polygon">
+            <i class="bi bi-pentagon-fill"></i>
+        </button>
+
+        <button class="fab" id="darkModeToggleFAB" title="Toggle Dark Mode">
+            <i class="bi bi-moon-fill"></i>
+        </button>
+    </div>
+
+    <!-- Drawing Instructions Panel -->
+    <div class="drawing-instructions d-none" id="drawingControls">
+        <div class="card shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span id="drawingInstructions">Click to draw.</span>
+                    </small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-success" id="finishDrawBtn">
+                            <i class="bi bi-check-lg"></i> Finish
+                        </button>
+                        <button class="btn btn-danger" id="cancelDrawBtn">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Input Modal -->
+    <div class="modal fade" id="dataInputModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Add Anxiety Zone Data
+                        <button class="btn btn-sm btn-link text-primary p-0 ms-2" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#tutorialCollapse" 
+                                aria-expanded="false">
+                            <i class="bi bi-info-circle-fill"></i>
+                        </button>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="collapse" id="tutorialCollapse">
+                    <div class="modal-body border-bottom bg-light">
+                        <h6 class="text-primary mb-2"><i class="bi bi-book me-1"></i> Quick Guide</h6>
+                        <ul class="small mb-0">
+                            <li><strong>Severity:</strong> Anxiety intensity from 1 (very low) to 5 (very high)</li>
+                            <li><strong>Always Active:</strong> Leave checked if zone is always problematic; uncheck to specify certain days/times</li>
+                            <li><strong>Location & Trigger:</strong> Describe where and what causes the anxiety</li>
+                            <li><strong>Lighting:</strong> How well-lit is this area</li>
+                            <li><strong>Remarks:</strong> Add any extra context or details</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form id="dataForm">
+                        <div class="mb-3">
+                            <label for="anxietySeverity" class="form-label">
+                                Severity Level: <span id="severityValue">3 - Medium</span>
+                            </label>
+                            <input type="range" class="form-range severity-slider" id="anxietySeverity" 
+                                min="1" max="5" value="3" step="1" required>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Low</span>
+                                <span>Medium</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <!--Devider - Horizontal Line-->
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="alwaysActive" checked>
+                                <label class="form-check-label fw-bold" for="alwaysActive">
+                                    Always Active (all days, all hours)
+                                </label>
+                            </div>
+
+                            <div id="timeControls">
+                                <label class="form-label">Active Days</label>
+                                <div class="day-selector mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="dayMon" value="Monday" checked disabled>
+                                        <label class="form-check-label" for="dayMon">Mon</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="dayTue" value="Tuesday" checked disabled>
+                                        <label class="form-check-label" for="dayTue">Tue</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="dayWed" value="Wednesday" checked disabled>
+                                        <label class="form-check-label" for="dayWed">Wed</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="dayThu" value="Thursday" checked disabled>
+                                        <label class="form-check-label" for="dayThu">Thu</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="dayFri" value="Friday" checked disabled>
+                                        <label class="form-check-label" for="dayFri">Fri</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="daySat" value="Saturday" checked disabled>
+                                        <label class="form-check-label" for="daySat">Sat</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="daySun" value="Sunday" checked disabled>
+                                        <label class="form-check-label" for="daySun">Sun</label>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="timeStart" class="form-label">Active From (Hour)</label>
+                                        <select class="form-select" id="timeStart" disabled>
+                                            <option value="">All day</option>
+                                            <option value="00:00">00:00 (Midnight)</option>
+                                            <option value="01:00">01:00</option>
+                                            <option value="02:00">02:00</option>
+                                            <option value="03:00">03:00</option>
+                                            <option value="04:00">04:00</option>
+                                            <option value="05:00">05:00</option>
+                                            <option value="06:00">06:00</option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:00">12:00 (Noon)</option>
+                                            <option value="13:00">13:00</option>
+                                            <option value="14:00">14:00</option>
+                                            <option value="15:00">15:00</option>
+                                            <option value="16:00">16:00</option>
+                                            <option value="17:00">17:00</option>
+                                            <option value="18:00">18:00</option>
+                                            <option value="19:00">19:00</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="21:00">21:00</option>
+                                            <option value="22:00">22:00</option>
+                                            <option value="23:00">23:00</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="timeEnd" class="form-label">Active Until (Hour)</label>
+                                        <select class="form-select" id="timeEnd" disabled>
+                                            <option value="">All day</option>
+                                            <option value="01:00">01:00</option>
+                                            <option value="02:00">02:00</option>
+                                            <option value="03:00">03:00</option>
+                                            <option value="04:00">04:00</option>
+                                            <option value="05:00">05:00</option>
+                                            <option value="06:00">06:00</option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:00">12:00 (Noon)</option>
+                                            <option value="13:00">13:00</option>
+                                            <option value="14:00">14:00</option>
+                                            <option value="15:00">15:00</option>
+                                            <option value="16:00">16:00</option>
+                                            <option value="17:00">17:00</option>
+                                            <option value="18:00">18:00</option>
+                                            <option value="19:00">19:00</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="21:00">21:00</option>
+                                            <option value="22:00">22:00</option>
+                                            <option value="23:00">23:00</option>
+                                            <option value="00:00">00:00 (Midnight)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-text">Customize specific days and hours when this zone is active</div>
+                            </div>
+                        </div>
+
+                        <!--Devider - Horizontal Line-->
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <label for="locationType" class="form-label">Location Type</label>
+                            <select class="form-select" id="locationType" required>
+                                <option value="">Select location type...</option>
+                                <option value="Street">Street</option>
+                                <option value="Allyway">Allyway</option>
+                                <option value="Park">Park</option>
+                                <option value="Square">Square</option>
+                                <option value="Tunnel">Tunnel</option>
+                                <option value="Bridge">Bridge</option>
+                                <option value="Parking">Parking Lot</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!--Devider - Horizontal Line-->
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <label class="form-label">Trigger Types<span class="text-muted small">(select multiple)</span></label>
+                            
+                            <!-- Selected Tags Display -->
+                            <div id="selectedTags" class="selected-tags-container mb-2"></div>
+                            
+                            <!-- Tag Selection Buttons -->
+                            <div class="tag-selection-grid mb-2">
+                                
+                                <button type="button" class="tag-btn" data-tag="Crime">High Crime</button>
+                                <button type="button" class="tag-btn" data-tag="Nightlife">Nightlife Zone</button>
+                                <button type="button" class="tag-btn" data-tag="Alcohol">Alcohol-Domianted</button>
+                                <button type="button" class="tag-btn" data-tag="Heavy Traffic">Heavy Traffic</button>
+                                <button type="button" class="tag-btn" data-tag="High Speed">High Speed</button>
+                                <button type="button" class="tag-btn" data-tag="Complex Navigation">Complex Intersection</button>
+                                <button type="button" class="tag-btn" data-tag="Poor Visibility">Poor Visibility</button>
+                                <button type="button" class="tag-btn" data-tag="Narrow Lanes">Narrow Lanes</button>
+                                <button type="button" class="tag-btn" data-tag="Merging Traffic">Merging Traffic</button>
+                                <button type="button" class="tag-btn" data-tag="Pedestrian Activity">Pedestrian Activity</button>
+                                <button type="button" class="tag-btn" data-tag="Cyclist Interaction">Cyclist Interaction</button>
+                                <button type="button" class="tag-btn" data-tag="Weather Conditions">Weather Conditions</button>
+                                <button type="button" class="tag-btn" data-tag="Construction Zone">Construction Zone</button>
+                                <button type="button" class="tag-btn" data-tag="Unfamiliar Area">Unfamiliar Area</button>
+                            </div>
+                            
+                            <!-- Custom Tag Input -->
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="customTagInput" 
+                                    placeholder="Add custom trigger...">
+                                <button class="btn btn-outline-secondary" type="button" id="addCustomTagBtn">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            
+                            <input type="hidden" id="triggerType" required>
+                        </div>
+
+                        <!--Devider - Horizontal Line-->
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <label for="lighting" class="form-label">
+                                Lighting: <span id="lightingValue">Moderate</span>
+                            </label>
+                            <input type="range" class="form-range lighting-slider" id="lighting" 
+                                min="1" max="3" value="2" step="1" required>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Poor</span>
+                                <span>Moderate</span>
+                                <span>Good</span>
+                            </div>
+                        </div>
+
+                        <!--Devider - Horizontal Line-->
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <label for="remark" class="form-label">Remarks</label>
+                            <textarea class="form-control" id="remark" rows="3" 
+                                placeholder="Additional details or context..."></textarea>
+                        </div>
+
+                        <input type="hidden" id="likes" value="0">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteGeometryBtn">
+                        <i class="bi bi-trash-fill me-1"></i>Delete & Cancel
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="saveDataBtn" class="btn btn-primary">Save to Database</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Panel (optional) -->
+    <div class="info-panel">
+        <div class="card shadow-sm">
+            <div class="card-body p-3">
+                <h6 class="card-title mb-2">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Contribute Data
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    Use the drawing tools to add anxiety zones to our database. 
+                    Click point or polygon tool to start.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
