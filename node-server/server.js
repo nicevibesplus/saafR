@@ -48,7 +48,7 @@ app.get('/streets', (req, res) => {
 });
 
 app.get('/anxiety_areas', (req, res) => {
-    const query = `SELECT ST_AsText(geometry) FROM anxiety_areas`;
+    const query = `SELECT *, ST_AsText(geometry) as geom_as_WKT FROM anxiety_areas`;
     pool.query(query, (err, result) => {
         if (err) {
             console.error('Error executing query', err);
