@@ -153,6 +153,44 @@ body {
     transform: scale(0.98);
 }
 
+/* ========================================
+   LOCATION BUTTON (BOTTOM RIGHT)
+   ======================================== */
+
+.location-button-container {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.location-fab {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+}
+
+.location-fab.active {
+    background: white;
+    color: #4285f4;
+}
+
+.location-fab.locating {
+    animation: pulse-location 1.5s infinite;
+}
+
+@keyframes pulse-location {
+    0% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(66, 133, 244, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+}
+
 /* "Choose on map" Buttons */
 .btn-pick-map {
     background: #8a1ba9;

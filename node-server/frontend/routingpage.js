@@ -80,6 +80,81 @@ window.renderPage = async function () {
         this.classList.toggle("active");
     });
 
+    // Location "Here I Am" button
+    const locateMeBtn = document.getElementById("locateMeBtn");
+    let locationMarker = null;
+
+    locateMeBtn.addEventListener("click", function () {
+        const btn = this;
+        const map = window.saafr.store.map;
+        if (!map) return;
+
+        // Show loading state
+        btn.classList.add("locating");
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            btn.classList.remove("locating");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Remove previous location marker
+                if (locationMarker) map.removeLayer(locationMarker);
+
+                // Add location marker (blue dot like Google Maps)
+                locationMarker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    color: '#fff',
+                    fillColor: '#4285f4',
+                    fillOpacity: 1,
+                    weight: 3
+                }).addTo(map);
+
+                // Zoom to location
+                map.setView([lat, lng], 16);
+
+                // Update start input in routing form
+                const startInput = document.getElementById("startInput");
+                if (startInput) {
+                    startInput.value = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+                }
+
+                // Update button state
+                btn.classList.remove("locating");
+                btn.classList.add("active");
+
+                // Store location reference
+                window.saafr.store.userLocation = { lat, lng };
+            },
+            function (error) {
+                btn.classList.remove("locating");
+                let message = "Unable to get your location.";
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = "Location access denied. Please enable location permissions.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = "Location information unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        message = "Location request timed out.";
+                        break;
+                }
+                alert(message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    });
+
     //window.saafr.map.initLayerToggles(window.saafr.store);
 };
 window.unmountPage = function () {
