@@ -28,42 +28,40 @@
                 <button type="button" class="btn-close" id="closeLayersSheet" aria-label="Close"></button>
             </div>
             
-            <div class="layers-section">
-                <h6 class="layers-section-title">Map Type</h6>
-                <div class="map-type-options">
-                    <div class="map-type-option active" id="mapTypeLight">
-                        <div class="map-type-preview light"></div>
-                        <span>Light</span>
-                    </div>
-                    <div class="map-type-option" id="mapTypeDark">
-                        <div class="map-type-preview dark"></div>
-                        <span>Dark</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="layers-section">
-                <h6 class="layers-section-title">Map Details</h6>
-                <div class="layer-toggle-item">
-                    <span><i class="bi bi-signpost-2-fill me-2"></i>Road Network</span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="toggleRoadNetwork">
+            <div class="layers-row">
+                <div class="map-type-section">
+                    <h6 class="layers-section-title">Map Type</h6>
+                    <div class="map-type-options">
+                        <div class="map-type-option active" id="mapTypeLight">
+                            <div class="map-type-preview light"></div>
+                            <span>Light</span>
+                        </div>
+                        <div class="map-type-option" id="mapTypeDark">
+                            <div class="map-type-preview dark"></div>
+                            <span>Dark</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="layers-section">
-                <h6 class="layers-section-title">Safety Layers</h6>
-                <div class="layer-toggle-item">
-                    <span><span class="legend-marker accidents me-2"></span>Accidents</span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input switch-red" type="checkbox" id="toggleAccidents">
+                
+                <div class="layers-toggles-section">
+                    <h6 class="layers-section-title">Layers</h6>
+                    <div class="layer-toggle-item">
+                        <span><i class="bi bi-signpost-2-fill me-2"></i>Roads</span>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggleRoadNetwork">
+                        </div>
                     </div>
-                </div>
-                <div class="layer-toggle-item">
-                    <span><span class="legend-marker anxiety me-2"></span>Anxiety Zones</span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input switch-yellow" type="checkbox" id="toggleAnxietyZones">
+                    <div class="layer-toggle-item">
+                        <span><span class="legend-marker accidents me-2"></span>Accidents</span>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input switch-red" type="checkbox" id="toggleAccidents">
+                        </div>
+                    </div>
+                    <div class="layer-toggle-item">
+                        <span><span class="legend-marker anxiety me-2"></span>Anxiety</span>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input switch-yellow" type="checkbox" id="toggleAnxietyZones">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,37 +93,12 @@
     <div class="routing-sheet-backdrop" id="routingSheetBackdrop"></div>
     <div id="routeInfoPanel" class="route-info-panel d-none">
         <div class="card shadow position-relative">
-
-            <button type="button" class="btn-close position-absolute top-0 end-0 mt-n2 me-2" aria-label="Close"
-                onclick="(p => { p.classList.add('d-none'); p.querySelector('#route-steps').classList.remove('expanded'); p.querySelector('#route-steps').innerHTML = ''; p.querySelector('#routeTime').textContent = ''; })(this.closest('#routeInfoPanel'))">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Close"
+                onclick="this.closest('#routeInfoPanel').classList.add('d-none');">
             </button>
-
-            <!-- HEADER -->
-            <div class="card-body pb-2">
-                <div class="d-flex justify-content-between align-items-center gap-3">
-                    <div>
-                        <div class="small text-muted">Estimated time</div>
-                        <div id="routeTime" class="fw-bold fs-5"></div>
-                    </div>
-
-                    <button id="startNavigationBtn" class="btn btn-primary btn-sm">
-                        Start
-                    </button>
-                </div>
-            </div>
-
-            <!-- ROUTE STEPS -->
-            <ul class="list-group list-group-flush route-steps" id = "route-steps"></ul>
-
-        </div>
-    </div>
-
-
-    <div id="navigationPanel" class="navigation-panel d-none">
-        <div class="card shadow">
             <div class="card-body">
-                <h6 class="mb-2">Navigation</h6>
-                <ul id="navigationSteps" class="list-group list-group-flush"></ul>
+                <div class="small text-muted">Estimated time</div>
+                <div id="routeTime" class="fw-bold fs-5"></div>
             </div>
         </div>
     </div>
