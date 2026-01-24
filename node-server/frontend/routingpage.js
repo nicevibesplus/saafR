@@ -24,6 +24,15 @@ window.renderPage = async function () {
     document.body.appendChild(routingModalEl);
 
     // Make routing modal non-blocking for map interaction
+    const bottomButtonContainer = document.querySelector('.bottom-button-container');
+    
+    routingModalEl.addEventListener('show.bs.modal', function () {
+        // Hide routing button with animation
+        if (bottomButtonContainer) {
+            bottomButtonContainer.classList.add('hidden');
+        }
+    });
+    
     routingModalEl.addEventListener('shown.bs.modal', function () {
         // Remove backdrop blocking
         const backdrop = document.querySelector('.modal-backdrop');
@@ -34,6 +43,13 @@ window.renderPage = async function () {
         // Allow body scrolling/map interaction
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
+    });
+    
+    routingModalEl.addEventListener('hidden.bs.modal', function () {
+        // Show routing button with animation
+        if (bottomButtonContainer) {
+            bottomButtonContainer.classList.remove('hidden');
+        }
     });
 
     bootstrap.Modal.getOrCreateInstance(layerModalEl).show();
