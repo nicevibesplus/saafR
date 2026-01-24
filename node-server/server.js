@@ -47,17 +47,60 @@ app.get('/streets', (req, res) => {
     });
 });
 
-app.get('/get_anxiety_areas', (req, res) => {
-    const query = `SELECT *, ST_AsText(geometry) as geom_as_WKT FROM anxiety_areas`;
-    pool.query(query, (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.json(result.rows);
+app.get('/get_anxiety_areas', async (req, res) => {
+  const query = `SELECT *, ST_AsGeoJSON(geometry) as geom_as_json FROM anxiety_areas`;
+
+  pool.query(query, (err, result) => {
+    if (err) return res.status(500).send('Internal Server Error');
+
+    let int_day = {
+      0: "Monday",
+      1: "Tuesday",
+      2: "Wednesday",
+      3: "Thursday",
+      4: "Friday",
+      5: "Saturday",
+      6: "Sunday"
+    };
+
+    const features = result.rows.map(row => {
+      // Convert active_days integers → strings
+      let active_days_string = [];
+      for (const day of row.active_days) {
+        for (const key in int_day) {
+          if (Number(key) === day) active_days_string.push(int_day[key]);
         }
+      }
+
+      // Convert geom_as_json string → object
+      const geometry = row.geom_as_json ? JSON.parse(row.geom_as_json) : null;
+
+      return {
+        type: "Feature",
+        geometry,
+        properties: {
+          uuid: row.uuid,
+          approved: row.approved,
+          start_time: row.start_time,
+          end_time: row.end_time,
+          active_days: active_days_string,
+          lighting: row.lighting,
+          likes: row.likes,
+          location_type: row.location_type,
+          remark: row.remark,
+          severity: row.severity,
+          trigger_type: row.trigger_type
+        }
+      };
     });
+
+    res.json({
+      type: "FeatureCollection",
+      features
+    });
+  });
 });
+
 
 app.get('/get_edges_with_accidents', async (req, res) => {
     const query = `SELECT jsonb_build_object(
@@ -339,12 +382,30 @@ app.post("/upload-anxiety-areas", async (req, res) => {
       trigger_type,
       geometry
     } = req.body;
+  
+    let approved = false
 
-    const name = "das"
-    const approved = false
-    const reason = "dasd"
 
     console.log("Received anxiety area data:", req.body);
+
+    let active_days_int = []
+    let day_int = {
+        Monday: 0,
+        Tuesday: 1,
+        Wednesday: 2,
+        Thursday: 3,
+        Friday: 4,
+        Saturday: 5,
+        Sunday: 6
+        };
+
+    for (day of active_days) {
+        for (key in day_int) {
+            if (day === key) {
+            active_days_int.push(day_int[key]);
+            }
+        }
+    }
 
     const geomWKT = geometry && geometry.lat != null && geometry.lng != null
         ? `POINT(${geometry.lng} ${geometry.lat})`
@@ -352,9 +413,7 @@ app.post("/upload-anxiety-areas", async (req, res) => {
 
     const query = `
         INSERT INTO anxiety_areas
-        (
-            name,
-            reason,
+        (  
             approved,
             start_time,
             end_time,
@@ -369,22 +428,20 @@ app.post("/upload-anxiety-areas", async (req, res) => {
         )
         VALUES
         (
-            $1, $2, $3, $4, $5,
-            ST_SetSRID(ST_GeomFromGeoJSON($6), 4326),
-            $7, $8, $9, $10, $11, $12, $13
+            $1, $2, $3,
+            ST_SetSRID(ST_GeomFromGeoJSON($4), 4326),
+            $5, $6, $7, $8, $9, $10, $11
         )
         RETURNING *;
         `;
 
-
-    const values = [
-        name,               
-        reason || null,          
+    console.log(typeof(lighting))
+    const values = [         
         approved ?? false,          
         active_time_start || null,  
         active_time_end || null,    
         JSON.stringify(geometry),   
-        active_days || null,        
+        active_days_int || null,        
         lighting || null,          
         likes || 0,                 
         location_type || null,      

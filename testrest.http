@@ -108,13 +108,18 @@ POST http://localhost:3000/upload-anxiety-areas
 Content-Type: application/json
 
 {"severity":3,
-"active_days":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-"active_time_start":null,
-"active_time_end":null,
+"active_days":["Tuesday","Thursday","Friday","Sunday"],
+"active_time_start": "4:00",
+"active_time_end": "12:00",
 "location_type":"Street",
-"trigger_type":"Complex Navigation",
+"trigger_type":["Complex Navigation", "Dark"],
 "lighting":2,
-"remark":"",
+"remark":"Test remark",
 "likes":0,
 "geometry":{"type":"Point","coordinates":[7.642364501953126,51.96933645806147]}}
 
+{"severity":4,
+"active_days":["Monday","Wednesday"],
+"active_time_start":"04:00",
+"active_time_end":"08:00","location_type":"Park",
+"trigger_type":"Narrow Lanes,Complex Navigation,Merging Traffic,Weather Conditions","lighting":1,"remark":"Dark Place","likes":0,"geometry":{"type":"Point","coordinates":[7.630691528320313,51.97007675567706]}}
