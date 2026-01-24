@@ -23,6 +23,19 @@ window.renderPage = async function () {
     document.body.appendChild(layerModalEl);
     document.body.appendChild(routingModalEl);
 
+    // Make routing modal non-blocking for map interaction
+    routingModalEl.addEventListener('shown.bs.modal', function () {
+        // Remove backdrop blocking
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.style.pointerEvents = 'none';
+            backdrop.style.opacity = '0';
+        }
+        // Allow body scrolling/map interaction
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    });
+
     bootstrap.Modal.getOrCreateInstance(layerModalEl).show();
 
     window.saafr.ui.initMobileGuards();

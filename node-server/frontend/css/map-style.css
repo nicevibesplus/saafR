@@ -403,6 +403,109 @@ body {
     transition: all 0.2s ease;
 }
 
+/* ========================================
+   ROUTING MODAL - TOP POSITION (Google Maps Style)
+   ======================================== */
+
+#routingModal {
+    pointer-events: none;
+}
+
+#routingModal .modal-dialog {
+    pointer-events: auto;
+    margin: 0;
+    position: absolute;
+    top: 56px; /* Below navbar */
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    width: 100%;
+    transform: none;
+}
+
+#routingModal .modal-content {
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    border: none;
+}
+
+#routingModal .modal-body {
+    padding: 15px 20px;
+}
+
+.routing-inputs-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.routing-inputs-container .input-group {
+    margin-bottom: 10px;
+}
+
+.routing-inputs-container .input-group:last-of-type {
+    margin-bottom: 12px;
+}
+
+.routing-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fab-inline-sm {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #495057;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.fab-inline-sm:hover {
+    background: #f8f9fa;
+}
+
+.routing-go-btn {
+    background: white !important;
+    color: #495057 !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 25px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.routing-go-btn:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+}
+
+#routingModal.modal.show ~ .modal-backdrop,
+#routingModal + .modal-backdrop {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Mobile responsive for routing inputs */
+@media (max-width: 600px) {
+    #routingModal .modal-body {
+        padding: 12px 15px;
+    }
+}
+
+/* Allow map interaction when routing modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
 /* Start Routing Button (Routing Modal) */
 #routingModal .modal-footer .btn-primary,
 #routeBtn {

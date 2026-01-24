@@ -64,40 +64,23 @@
     </div>
 
     <div class="modal fade" id="routingModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Route Calculation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
-                    <div class="input-group">
-                        <input id="startInput" type="text" class="form-control" placeholder="lat,lng or address">
-                        <button class="fab fab-inline" type="button" id="pickStartBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
-                    </div>
-
-                    <div class="input-group">
-                        <input id="endInput" type="text" class="form-control" placeholder="lat,lng or address">
-                        <button class="fab fab-inline" type="button" id="pickEndBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
-                    </div>
-
-
-                    <div class="route-considerations mt-4">
-                        <h6 class="mb-2">The routing considers:</h6>
-                        <div class="consideration-list">
-                            <div class="consideration-item" id="routingAccidentsStatus">
-                                <span class="legend-marker accidents"></span>
-                                <span class="consideration-text">Accidents</span>
-                            </div>
-                            <div class="consideration-item" id="routingAnxietyStatus">
-                                <span class="legend-marker anxiety"></span>
-                                <span class="consideration-text">Anxiety Zones</span>
-                            </div>
+                    <div class="routing-inputs-container">
+                        <div class="input-group mb-2">
+                            <input id="startInput" type="text" class="form-control" placeholder="Start: lat,lng or address">
+                            <button class="fab fab-inline-sm" type="button" id="pickStartBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
+                        </div>
+                        <div class="input-group mb-2">
+                            <input id="endInput" type="text" class="form-control" placeholder="Destination: lat,lng or address">
+                            <button class="fab fab-inline-sm" type="button" id="pickEndBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
+                        </div>
+                        <div class="routing-actions">
+                            <button type="button" id="routeBtn" class="btn routing-go-btn">Start Routing</button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="routeBtn" class="btn btn-primary">Start Routing</button>
                 </div>
             </div>
         </div>
