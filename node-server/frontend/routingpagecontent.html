@@ -2,25 +2,13 @@
     <div id="map"></div>
 
     <div class="fab-container-top">
-        <button class="fab" id="layerToggleFAB" data-bs-toggle="modal" data-bs-target="#layerModal" title="Layers">
+        <button class="fab" id="layersBtn" title="Layers">
             <i class="bi bi-layers-fill"></i>
-        </button>
-
-        <!-- <button class="fab popup-fab active d-none" id="popupToggleFAB" title="Toggle Accident Info">
-            <i class="bi bi-chat-square-text-fill"></i>
-        </button> -->
-
-        <button class="fab" id="darkModeSwitch" title="Toggle Dark Mode">
-            <i class="bi bi-sun-fill"></i>
-        </button>
-
-        <button class="fab" id="toggleRoadNetwork" title="Toggle Road Network">
-            <i class="bi bi-map-fill"></i>
         </button>
     </div>
 
     <div class="bottom-button-container">
-        <button class="routing-button" data-bs-toggle="modal" data-bs-target="#routingModal">
+        <button class="routing-button" id="openRoutingBtn">
             <i class="bi bi-sign-turn-right-fill me-2"></i>
             Routing
         </button>
@@ -32,59 +20,79 @@
         </button>
     </div>
 
-    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" id="routeCalculation">
-                <div class="modal-header">
-                    <h5 class="modal-title">I want to avoid:</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input switch-red" type="checkbox" id="toggleAccidents" unchecked>
-                        <label class="form-check-label" for="toggleAccidents">
-                            <span class="legend-marker accidents"></span>
-                            Accidents
-                        </label>
+    <!-- Layers Bottom Sheet -->
+    <div class="layers-bottom-sheet" id="layersBottomSheet">
+        <div class="layers-sheet-content">
+            <div class="layers-sheet-header">
+                <span>Map Settings</span>
+                <button type="button" class="btn-close" id="closeLayersSheet" aria-label="Close"></button>
+            </div>
+            
+            <div class="layers-section">
+                <h6 class="layers-section-title">Map Type</h6>
+                <div class="map-type-options">
+                    <div class="map-type-option active" id="mapTypeLight">
+                        <div class="map-type-preview light"></div>
+                        <span>Light</span>
                     </div>
-
+                    <div class="map-type-option" id="mapTypeDark">
+                        <div class="map-type-preview dark"></div>
+                        <span>Dark</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="layers-section">
+                <h6 class="layers-section-title">Map Details</h6>
+                <div class="layer-toggle-item">
+                    <span><i class="bi bi-signpost-2-fill me-2"></i>Road Network</span>
                     <div class="form-check form-switch">
-                        <input class="form-check-input switch-yellow" type="checkbox" id="toggleAnxietyZones" unchecked>
-                        <label class="form-check-label" for="toggleAnxietyZones">
-                            <span class="legend-marker anxiety"></span>
-                            Anxiety Zones
-                        </label>
+                        <input class="form-check-input" type="checkbox" id="toggleRoadNetwork">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Let's saafr!</button>
+            </div>
+            
+            <div class="layers-section">
+                <h6 class="layers-section-title">Safety Layers</h6>
+                <div class="layer-toggle-item">
+                    <span><span class="legend-marker accidents me-2"></span>Accidents</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input switch-red" type="checkbox" id="toggleAccidents">
+                    </div>
+                </div>
+                <div class="layer-toggle-item">
+                    <span><span class="legend-marker anxiety me-2"></span>Anxiety Zones</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input switch-yellow" type="checkbox" id="toggleAnxietyZones">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="layers-sheet-backdrop" id="layersSheetBackdrop"></div>
 
-    <div class="modal fade" id="routingModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="routing-inputs-container">
-                        <div class="input-group mb-2">
-                            <input id="startInput" type="text" class="form-control" placeholder="Start: lat,lng or address">
-                            <button class="fab fab-inline-sm" type="button" id="pickStartBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
-                        </div>
-                        <div class="input-group mb-2">
-                            <input id="endInput" type="text" class="form-control" placeholder="Destination: lat,lng or address">
-                            <button class="fab fab-inline-sm" type="button" id="pickEndBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
-                        </div>
-                        <div class="routing-actions">
-                            <button type="button" id="routeBtn" class="btn routing-go-btn">Start Routing</button>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
+    <!-- Routing Top Sheet -->
+    <div class="routing-sheet-wrapper">
+        <div class="routing-bottom-sheet" id="routingBottomSheet">
+            <div class="routing-sheet-content">
+                <div class="routing-inputs-container">
+                    <div class="input-group mb-2">
+                        <input id="startInput" type="text" class="form-control" placeholder="Start: lat,lng or address">
+                        <button class="fab fab-inline-sm" type="button" id="pickStartBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
+                    </div>
+                    <div class="input-group mb-2">
+                        <input id="endInput" type="text" class="form-control" placeholder="Destination: lat,lng or address">
+                        <button class="fab fab-inline-sm" type="button" id="pickEndBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
+                    </div>
+                    <div class="routing-actions">
+                        <button type="button" id="routeBtn" class="btn routing-go-btn">Start Routing</button>
+                        <button type="button" class="btn-close" id="closeRoutingSheet" aria-label="Close"></button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="routing-sheet-backdrop" id="routingSheetBackdrop"></div>
     <div id="routeInfoPanel" class="route-info-panel d-none">
         <div class="card shadow position-relative">
 

@@ -18,9 +18,10 @@ and zooms to the calculated route
         const pickEndBtn = document.getElementById("pickEndBtn");
 
         function startPickMode(targetInputId) {
-            const modalEl = document.getElementById("routingModal");
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
+            // Close routing bottom sheet
+            if (window.saafr.closeRoutingSheet) {
+                window.saafr.closeRoutingSheet();
+            }
 
             const map = store.map;
             if (!map) return;
@@ -42,7 +43,13 @@ and zooms to the calculated route
                 map.getContainer().style.cursor = "";
                 map.off("click", onceClick);
 
-                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                // Reopen routing bottom sheet
+                const routingBottomSheet = document.getElementById("routingBottomSheet");
+                const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
+                const bottomButtonContainer = document.querySelector('.bottom-button-container');
+                if (routingBottomSheet) routingBottomSheet.classList.add('open');
+                if (routingSheetBackdrop) routingSheetBackdrop.classList.add('open');
+                if (bottomButtonContainer) bottomButtonContainer.classList.add('hidden');
             };
 
             map.on("click", onceClick);
@@ -179,9 +186,10 @@ and zooms to the calculated route
                 .addTo(store.map)
                 .bindPopup(`${targetLabel}`);
 
-            const modalEl = document.getElementById("routingModal");
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
+            // Close routing bottom sheet
+            if (window.saafr.closeRoutingSheet) {
+                window.saafr.closeRoutingSheet();
+            }
 
             map.fitBounds(store.route.layer.getBounds());
         });
