@@ -118,10 +118,10 @@ body {
 }
 
 /* ========================================
-   BOTTOM ROUTING BUTTON
+   BOTTOM BAR (Time, Routing, Location)
    ======================================== */
 
-.bottom-button-container {
+.bottom-bar-center {
     position: absolute;
     bottom: 30px;
     left: 50%;
@@ -130,60 +130,93 @@ body {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.bottom-button-container.hidden {
+.bottom-bar-center.hidden {
     transform: translateX(-50%) translateY(100px);
     opacity: 0;
     pointer-events: none;
 }
 
-.routing-button {
+.bottom-bar-item {
     background: white;
     color: #495057;
     border: none;
-    padding: 12px 32px;
+    padding: 12px 20px;
     border-radius: 25px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bottom-bar-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.time-display {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    z-index: 1000;
+    cursor: default;
+    padding: 12px 16px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.time-display:hover {
+    transform: none;
+}
+
+.time-display.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.routing-button {
+    padding: 12px 24px;
 }
 
 .routing-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .routing-button:active {
     transform: scale(0.98);
 }
 
-/* ========================================
-   LOCATION BUTTON (BOTTOM RIGHT)
-   ======================================== */
-
-.location-button-container {
+.location-btn {
     position: absolute;
     bottom: 30px;
     right: 20px;
     z-index: 1000;
+    padding: 12px 14px;
+    border-radius: 50%;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.location-fab {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
+.location-btn:hover {
+    transform: scale(1.1);
 }
 
-.location-fab.active {
-    background: white;
+.location-btn:active {
+    transform: scale(0.95);
+}
+
+.location-btn.active {
     color: #4285f4;
 }
 
-.location-fab.locating {
+.location-btn.locating {
     animation: pulse-location 1.5s infinite;
+}
+
+.location-btn.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
 }
 
 @keyframes pulse-location {

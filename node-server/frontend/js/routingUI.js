@@ -67,10 +67,14 @@ and zooms to the calculated route
                 // Reopen routing bottom sheet
                 const routingBottomSheet = document.getElementById("routingBottomSheet");
                 const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
-                const bottomButtonContainer = document.querySelector('.bottom-button-container');
+                const bottomBarCenter = document.querySelector('.bottom-bar-center');
+                const routeTimeDisplay = document.getElementById("routeTimeDisplay");
+                const locationBtn = document.getElementById("locateMeBtn");
                 if (routingBottomSheet) routingBottomSheet.classList.add('open');
                 if (routingSheetBackdrop) routingSheetBackdrop.classList.add('open');
-                if (bottomButtonContainer) bottomButtonContainer.classList.add('hidden');
+                if (bottomBarCenter) bottomBarCenter.classList.add('hidden');
+                if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden');
+                if (locationBtn) locationBtn.classList.add('hidden');
             };
 
             map.on("click", onceClick);
@@ -123,12 +127,12 @@ and zooms to the calculated route
             const timeMs = path.time;
             const minutes = Math.round(timeMs / 60000);
 
-            // Show route time info
-            const routeInfo = document.getElementById("routeInfoPanel");
+            // Show route time in bottom bar
+            const routeTimeDisplay = document.getElementById("routeTimeDisplay");
             const routeTime = document.getElementById("routeTime");
 
             routeTime.textContent = `${minutes} min`;
-            routeInfo.classList.remove("d-none");
+            routeTimeDisplay.classList.remove("d-none");
 
 
             // Remove pick markers if they exist

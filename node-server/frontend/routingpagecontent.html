@@ -7,18 +7,21 @@
         </button>
     </div>
 
-    <div class="bottom-button-container">
-        <button class="routing-button" id="openRoutingBtn">
+    <div class="bottom-bar-item time-display d-none" id="routeTimeDisplay">
+        <i class="bi bi-clock me-2"></i>
+        <span id="routeTime">--</span>
+    </div>
+
+    <div class="bottom-bar-center">
+        <button class="bottom-bar-item routing-button" id="openRoutingBtn">
             <i class="bi bi-sign-turn-right-fill me-2"></i>
             Routing
         </button>
     </div>
 
-    <div class="location-button-container">
-        <button class="fab location-fab" id="locateMeBtn" title="My Location">
-            <i class="bi bi-crosshair"></i>
-        </button>
-    </div>
+    <button class="bottom-bar-item location-btn" id="locateMeBtn" title="My Location">
+        <i class="bi bi-crosshair"></i>
+    </button>
 
     <!-- Layers Bottom Sheet -->
     <div class="layers-bottom-sheet" id="layersBottomSheet">
@@ -91,16 +94,5 @@
         </div>
     </div>
     <div class="routing-sheet-backdrop" id="routingSheetBackdrop"></div>
-    <div id="routeInfoPanel" class="route-info-panel d-none">
-        <div class="card shadow position-relative">
-            <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Close"
-                onclick="this.closest('#routeInfoPanel').classList.add('d-none');">
-            </button>
-            <div class="card-body">
-                <div class="small text-muted">Estimated time</div>
-                <div id="routeTime" class="fw-bold fs-5"></div>
-            </div>
-        </div>
-    </div>
 
 </div>

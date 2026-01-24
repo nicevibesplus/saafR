@@ -23,22 +23,24 @@ window.renderPage = async function () {
     const routingBottomSheet = document.getElementById("routingBottomSheet");
     const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
     const closeRoutingSheet = document.getElementById("closeRoutingSheet");
-    const bottomButtonContainer = document.querySelector('.bottom-button-container');
+    const bottomBarCenter = document.querySelector('.bottom-bar-center');
+    const routeTimeDisplay = document.getElementById("routeTimeDisplay");
+    const locationBtn = document.getElementById("locateMeBtn");
 
     function openRoutingSheetFn() {
         routingBottomSheet.classList.add('open');
         routingSheetBackdrop.classList.add('open');
-        if (bottomButtonContainer) {
-            bottomButtonContainer.classList.add('hidden');
-        }
+        if (bottomBarCenter) bottomBarCenter.classList.add('hidden');
+        if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden');
+        if (locationBtn) locationBtn.classList.add('hidden');
     }
 
     function closeRoutingSheetFn() {
         routingBottomSheet.classList.remove('open');
         routingSheetBackdrop.classList.remove('open');
-        if (bottomButtonContainer) {
-            bottomButtonContainer.classList.remove('hidden');
-        }
+        if (bottomBarCenter) bottomBarCenter.classList.remove('hidden');
+        if (routeTimeDisplay) routeTimeDisplay.classList.remove('hidden');
+        if (locationBtn) locationBtn.classList.remove('hidden');
     }
 
     // Store close function globally for use after routing
