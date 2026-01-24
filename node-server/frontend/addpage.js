@@ -27,14 +27,14 @@ window.renderPage = async function () {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add drawn items layer to map
-    map.addLayer(window.addPageStore.drawnItems);
-
-    // Add WFS anxiety zones layer
     async function loadAnxietyZones() {
         try {
-            const response = await fetch('YOUR_WFS_ENDPOINT_OR_API_HERE');
+            const response = await fetch('http://localhost:3000/get_anxiety_areas');
             const geojsonData = await response.json();
+
+            if (window.addPageStore.anxietyLayer) {
+                map.removeLayer(window.addPageStore.anxietyLayer);
+            }
             
             const anxietyLayer = L.geoJSON(geojsonData, {
                 style: function(feature) {
@@ -64,7 +64,6 @@ window.renderPage = async function () {
             
             anxietyLayer.addTo(map);
             window.addPageStore.anxietyLayer = anxietyLayer;
-            
         } catch (error) {
             console.error('Error loading anxiety zones:', error);
         }
@@ -73,14 +72,17 @@ window.renderPage = async function () {
     // Load anxiety zones on page load
     loadAnxietyZones();
 
+    
+
     function showAnxietyZonePopup(feature, layer) {
         const props = feature.properties;
         
         // Build trigger tags display
-        const triggers = props.trigger_type ? props.trigger_type.split(',') : [];
-        const triggersHTML = triggers.map(t => 
+        let triggers = props.trigger_type || [];  // already an array
+        let triggersHTML = triggers.map(t => 
             `<span class="badge bg-primary me-1 mb-1">${t.trim()}</span>`
         ).join('');
+
         
         // Build active days display
         const days = props.active_days || [];
@@ -397,7 +399,6 @@ window.renderPage = async function () {
       }
       
       // Collect active days
-      // Collect active days
       const activeDays = [];
       const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
       const alwaysActiveChecked = document.getElementById('alwaysActive').checked;
@@ -415,14 +416,17 @@ window.renderPage = async function () {
           });
       }               
       
+      
       // Collect form data
+      let trigger_type_string = document.getElementById('triggerType').value
+      let trigger_type_array = trigger_type_string.split(",")
       const formData = {
           severity: parseInt(document.getElementById('anxietySeverity').value),
           active_days: activeDays,
           active_time_start: document.getElementById('timeStart').value || null,
           active_time_end: document.getElementById('timeEnd').value || null,
           location_type: document.getElementById('locationType').value,
-          trigger_type: document.getElementById('triggerType').value,
+          trigger_type: trigger_type_array,
           lighting: parseInt(document.getElementById('lighting').value),
           remark: document.getElementById('remark').value,
           likes: 0,
@@ -445,29 +449,55 @@ window.renderPage = async function () {
       }
       
       console.log('Data to save:', formData);
+      console.log(JSON.stringify(formData));
+    
+      try {
+          const response = await fetch('/upload-anxiety-areas', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+          });
+          if (response.ok) {
+              alert('Data saved successfully!');
+          }
+      } catch (error) {
+          console.error('Save error:', error);
+          alert('Error saving data. Check console.');
+      }
       
-      // TODO: Send to PostGIS database
-      // Example:
-      // try {
-      //     const response = await fetch('YOUR_API_ENDPOINT', {
-      //         method: 'POST',
-      //         headers: { 'Content-Type': 'application/json' },
-      //         body: JSON.stringify(formData)
-      //     });
-      //     if (response.ok) {
-      //         alert('Data saved successfully!');
-      //     }
-      // } catch (error) {
-      //     console.error('Save error:', error);
-      //     alert('Error saving data. Check console.');
-      // }
-      
+    loadAnxietyZones();
       // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
-      
-      // Show success message (temporary)
-      alert('Data prepared for database insertion. Check console for details.');
+      bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();   
     });
+
+    function showSavedNotification(){
+    let toastEl = document.getElementById('toastdbsuccess');
+    
+    // Create if doesn't exist
+    if (!toastEl) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+            <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+                <div class="toast" id="toastdbsuccess">
+                    <div class="toast-header">
+                        <strong class="me-auto">Success</strong>
+                        <small>Just now</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Zone saved successfully!
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(wrapper.firstElementChild);
+        toastEl = document.getElementById('toastdbsuccess');
+    }
+    
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+    }
+    showSavedNotification()
 
 
     // Delete geometry and cancel button
@@ -481,7 +511,7 @@ window.renderPage = async function () {
             // Clear reference
             window.addPageStore.currentDrawing = null;
         }
-        
+
         // Close modal
         bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
     });
