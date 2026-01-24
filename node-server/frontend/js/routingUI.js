@@ -17,6 +17,19 @@ and zooms to the calculated route
         const pickStartBtn = document.getElementById("pickStartBtn");
         const pickEndBtn = document.getElementById("pickEndBtn");
 
+        // Custom white marker with grey outline
+        function createRouteMarker(latlng, label, isStart) {
+            const marker = L.circleMarker(latlng, {
+                radius: 10,
+                color: '#666',
+                weight: 2,
+                fillColor: '#fff',
+                fillOpacity: 1
+            });
+            marker.bindPopup(`<strong>${isStart ? 'Start' : 'Destination'}:</strong><br>${label}`);
+            return marker;
+        }
+
         function startPickMode(targetInputId) {
             // Close routing bottom sheet
             if (window.saafr.closeRoutingSheet) {
@@ -31,14 +44,22 @@ and zooms to the calculated route
             const onceClick = function (e) {
                 const lat = e.latlng.lat.toFixed(6);
                 const lng = e.latlng.lng.toFixed(6);
+                const coordsText = `${lat}, ${lng}`;
 
                 const input = document.getElementById(targetInputId);
                 if (input) input.value = `${lat},${lng}`;
 
-                L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent("Point selected")
-                    .openOn(map);
+                // Remove previous pick marker if exists
+                store.route = store.route || {};
+                const markerKey = targetInputId === 'startInput' ? 'pickStartMarker' : 'pickEndMarker';
+                if (store.route[markerKey]) {
+                    map.removeLayer(store.route[markerKey]);
+                }
+
+                // Create and add the marker
+                const isStart = targetInputId === 'startInput';
+                store.route[markerKey] = createRouteMarker([lat, lng], coordsText, isStart);
+                store.route[markerKey].addTo(map).openPopup();
 
                 map.getContainer().style.cursor = "";
                 map.off("click", onceClick);
@@ -175,16 +196,41 @@ and zooms to the calculated route
             };
 
 
-            //Adding marker for end point
-            const targetLabel = endText || "Ziel";
+            // Remove pick markers if they exist
+            if (store.route.pickStartMarker) {
+                map.removeLayer(store.route.pickStartMarker);
+                store.route.pickStartMarker = null;
+            }
+            if (store.route.pickEndMarker) {
+                map.removeLayer(store.route.pickEndMarker);
+                store.route.pickEndMarker = null;
+            }
 
+            // Adding marker for start point
+            const startLabel = startText || "Start";
+            if (store.route.startMarker) {
+                store.map.removeLayer(store.route.startMarker);
+            }
+            store.route.startMarker = L.circleMarker([start.lat, start.lng], {
+                radius: 10,
+                color: '#666',
+                weight: 2,
+                fillColor: '#fff',
+                fillOpacity: 1
+            }).addTo(store.map).bindPopup(`<strong>Start:</strong><br>${startLabel}`);
+
+            // Adding marker for end point
+            const targetLabel = endText || "Destination";
             if (store.route.endMarker) {
                 store.map.removeLayer(store.route.endMarker);
             }
-
-            store.route.endMarker = L.marker([end.lat, end.lng])
-                .addTo(store.map)
-                .bindPopup(`${targetLabel}`);
+            store.route.endMarker = L.circleMarker([end.lat, end.lng], {
+                radius: 10,
+                color: '#666',
+                weight: 2,
+                fillColor: '#fff',
+                fillOpacity: 1
+            }).addTo(store.map).bindPopup(`<strong>Destination:</strong><br>${targetLabel}`);
 
             // Close routing bottom sheet
             if (window.saafr.closeRoutingSheet) {
