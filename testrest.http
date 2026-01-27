@@ -123,3 +123,10 @@ Content-Type: application/json
 "active_time_start":"04:00",
 "active_time_end":"08:00","location_type":"Park",
 "trigger_type":"Narrow Lanes,Complex Navigation,Merging Traffic,Weather Conditions","lighting":1,"remark":"Dark Place","likes":0,"geometry":{"type":"Point","coordinates":[7.630691528320313,51.97007675567706]}}
+
+###
+
+POST http://localhost:3000/increase_community_rating
+Content-Type: application/json
+
+{"uuid":"a8c4fde1-9b9d-4293-b7bb-9b68121de4c2"}

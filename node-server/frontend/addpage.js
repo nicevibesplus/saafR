@@ -75,7 +75,7 @@ window.renderPage = async function () {
     
 
     function showAnxietyZonePopup(feature, layer) {
-        const props = feature.properties;
+        const props = feature.properties
         
         // Build trigger tags display
         let triggers = props.trigger_type || [];  // already an array
@@ -153,15 +153,15 @@ window.renderPage = async function () {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Community Rating:</strong>
-                        <span class="ms-2 badge ${props.likes >= 0 ? 'bg-success' : 'bg-danger'}" id="likesDisplay-${props.id}">
+                        <span class="ms-2 badge ${props.likes >= 0 ? 'bg-success' : 'bg-danger'}" id="likesDisplay-${props.uuid}">
                             ${props.likes || 0}
                         </span>
                     </div>
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-success" onclick="updateLikes(${props.id}, 1, this)">
+                        <button type="button" class="btn btn-outline-success" onclick="increaseLikes('${props.uuid}', this)">
                             <i class="bi bi-hand-thumbs-up-fill"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-danger" onclick="updateLikes(${props.id}, -1, this)">
+                        <button type="button" class="btn btn-outline-danger" onclick="decreaseLikes('${props.uuid}', this, ${props.likes})">
                             <i class="bi bi-hand-thumbs-down-fill"></i>
                         </button>
                     </div>
@@ -177,15 +177,15 @@ window.renderPage = async function () {
 
 
     // Like/Dislike Handler
-    window.updateLikes = async function(zoneId, delta, buttonElement) {
+    window.increaseLikes = async function(zoneId, buttonElement) {
         // Disable button during request
         buttonElement.disabled = true;
         
         try {
-            const response = await fetch(`YOUR_API_ENDPOINT/anxiety-zones/${zoneId}/like`, {
-                method: 'PATCH',
+            const response = await fetch(`http://localhost:3000/increase_community_rating`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ delta: delta }) // +1 or -1
+                body: JSON.stringify({ uuid: zoneId })
             });
             
             if (response.ok) {
@@ -199,7 +199,7 @@ window.renderPage = async function () {
                     // Update badge color
                     likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
                 }
-                
+                loadAnxietyZones();
                 // Visual feedback - briefly highlight the button
                 buttonElement.classList.add('active');
                 setTimeout(() => {
@@ -216,6 +216,55 @@ window.renderPage = async function () {
             console.error('Error updating likes:', error);
             alert('Network error. Please check your connection.');
             buttonElement.disabled = false;
+        }
+    };
+
+    window.decreaseLikes = async function(zoneId, buttonElement, likeNumber) {
+        // Disable button during request
+        buttonElement.disabled = true;
+        
+        try {
+            if (likeNumber <= 0){
+                alert('Cannot decrease rating below zero.');
+            }
+            else {
+                const response = await fetch(`http://localhost:3000/decrease_community_rating`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uuid: zoneId })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update the display immediately
+                    const likesDisplay = document.getElementById(`likesDisplay-${zoneId}`);
+                    if (likesDisplay) {
+                        likesDisplay.textContent = data.newLikes;
+                        
+                        // Update badge color
+                        likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
+                    }
+
+                    // Visual feedback - briefly highlight the button
+                    buttonElement.classList.add('active');
+                    setTimeout(() => {
+                        buttonElement.classList.remove('active');
+                        buttonElement.disabled = false;
+                    }, 300);
+
+                    loadAnxietyZones();
+                    
+                } else {
+                    alert('Error updating rating. Please try again.');
+                    buttonElement.disabled = false;
+                }
+            }
+                
+        } catch (error) {
+                console.error('Error updating likes:', error);
+                alert('Network error. Please check your connection.');
+                buttonElement.disabled = false;
         }
     };
 

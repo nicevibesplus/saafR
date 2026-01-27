@@ -461,6 +461,34 @@ app.post("/upload-anxiety-areas", async (req, res) => {
   }
 });
 
+app.post('/increase_community_rating', async (req, res) => {
+    try{
+        let {uuid} = req.body;
+        let query = 'UPDATE anxiety_areas SET likes = likes + 1 WHERE uuid = $1 RETURNING likes';
+        let result = await pool.query(query, [uuid]);
+        res.status(200).json({
+            success: true,
+            newLikes: result.rows[0].likes
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/decrease_community_rating', async (req, res) => {
+    try{
+        let {uuid} = req.body;
+        let query = 'UPDATE anxiety_areas SET likes = likes - 1 WHERE uuid = $1 AND likes <> 0 RETURNING likes';
+        let result = await pool.query(query, [uuid]);
+        res.status(200).json({ success: true, newLikes: result.rows[0].likes });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 
 
 
