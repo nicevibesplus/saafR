@@ -37,21 +37,14 @@ window.renderPage = async function () {
             }
             
             const anxietyLayer = L.geoJSON(geojsonData, {
-                style: function(feature) {
-                    return {
-                        color: '#ffc107',
-                        weight: 2,
-                        fillOpacity: 0.4
-                    };
-                },
                 pointToLayer: function(feature, latlng) {
                     return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: '#ffc107',
-                        color: '#000',
-                        weight: 1,
+                        radius: 6,
+                        fillColor: "#ffc107",
+                        color: "#fff",
+                        weight: 2,
                         opacity: 1,
-                        fillOpacity: 0.6
+                        fillOpacity: 0.8
                     });
                 },
                 onEachFeature: function(feature, layer) {
