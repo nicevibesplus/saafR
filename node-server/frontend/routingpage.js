@@ -12,47 +12,91 @@ window.renderPage = async function () {
         return; // Stop execution if HTML fails to load
     }
 
-    const layerModalEl = document.getElementById("layerModal");
-    const routingModalEl = document.getElementById("routingModal");
-
-    if (!layerModalEl || !routingModalEl) {
-        console.error("Modal Elemente fehlen im DOM.");
-        return;
-    }
-
-    document.body.appendChild(layerModalEl);
-    document.body.appendChild(routingModalEl);
-
-    bootstrap.Modal.getOrCreateInstance(layerModalEl).show();
-
     window.saafr.ui.initMobileGuards();
 
     window.saafr.store.getMap(); // Stelle sicher, dass die Karte initialisiert ist
     window.saafr.store.map.addLayer(window.saafr.store.getActiveBase());
     window.saafr.routing.initRoutingUI(window.saafr.store);
 
+    // Routing Bottom Sheet
+    const openRoutingBtn = document.getElementById("openRoutingBtn");
+    const routingBottomSheet = document.getElementById("routingBottomSheet");
+    const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
+    const closeRoutingSheet = document.getElementById("closeRoutingSheet");
+    const bottomBarCenter = document.querySelector('.bottom-bar-center');
+    const routeTimeDisplay = document.getElementById("routeTimeDisplay");
+    const locationBtn = document.getElementById("locateMeBtn");
 
-    const darkModeSwitch = document.getElementById("darkModeSwitch");
-    darkModeSwitch.addEventListener("click", function () {
-        const isActive = this.classList.contains("active");
-        const icon = this.querySelector("i");
+    function openRoutingSheetFn() {
+        routingBottomSheet.classList.add('open');
+        routingSheetBackdrop.classList.add('open');
+        if (bottomBarCenter) bottomBarCenter.classList.add('hidden');
+        if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden');
+        if (locationBtn) locationBtn.classList.add('hidden');
+    }
+
+    function closeRoutingSheetFn() {
+        routingBottomSheet.classList.remove('open');
+        routingSheetBackdrop.classList.remove('open');
+        if (bottomBarCenter) bottomBarCenter.classList.remove('hidden');
+        if (routeTimeDisplay) routeTimeDisplay.classList.remove('hidden');
+        if (locationBtn) locationBtn.classList.remove('hidden');
+    }
+
+    // Store close function globally for use after routing
+    window.saafr.closeRoutingSheet = closeRoutingSheetFn;
+
+    openRoutingBtn.addEventListener("click", openRoutingSheetFn);
+    closeRoutingSheet.addEventListener("click", closeRoutingSheetFn);
+    routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
+
+    // Layers Bottom Sheet
+    const layersBtn = document.getElementById("layersBtn");
+    const layersBottomSheet = document.getElementById("layersBottomSheet");
+    const layersSheetBackdrop = document.getElementById("layersSheetBackdrop");
+    const closeLayersSheet = document.getElementById("closeLayersSheet");
+
+    function openLayersSheet() {
+        layersBottomSheet.classList.add('open');
+        layersSheetBackdrop.classList.add('open');
+    }
+
+    function closeLayersSheetFn() {
+        layersBottomSheet.classList.remove('open');
+        layersSheetBackdrop.classList.remove('open');
+    }
+
+    layersBtn.addEventListener("click", openLayersSheet);
+    closeLayersSheet.addEventListener("click", closeLayersSheetFn);
+    layersSheetBackdrop.addEventListener("click", closeLayersSheetFn);
+
+    // Map Type Toggle (Light/Dark)
+    const mapTypeLight = document.getElementById("mapTypeLight");
+    const mapTypeDark = document.getElementById("mapTypeDark");
+
+    mapTypeLight.addEventListener("click", function () {
+        if (this.classList.contains("active")) return;
         window.saafr.store.map.removeLayer(window.saafr.store.getActiveBase());
-        window.saafr.store.setDarkMode(!isActive);
+        window.saafr.store.setDarkMode(false);
         var layer = window.saafr.store.getActiveBase();
         window.saafr.store.map.addLayer(layer);
         layer.bringToBack();
-        this.classList.toggle("active");
-
-        // Toggle icon between sun and moon
-        if (icon.classList.contains("bi-sun-fill")) {
-            icon.classList.remove("bi-sun-fill");
-            icon.classList.add("bi-moon-fill");
-        } else {
-            icon.classList.remove("bi-moon-fill");
-            icon.classList.add("bi-sun-fill");
-        }
+        this.classList.add("active");
+        mapTypeDark.classList.remove("active");
     });
 
+    mapTypeDark.addEventListener("click", function () {
+        if (this.classList.contains("active")) return;
+        window.saafr.store.map.removeLayer(window.saafr.store.getActiveBase());
+        window.saafr.store.setDarkMode(true);
+        var layer = window.saafr.store.getActiveBase();
+        window.saafr.store.map.addLayer(layer);
+        layer.bringToBack();
+        this.classList.add("active");
+        mapTypeLight.classList.remove("active");
+    });
+
+    // Accidents Toggle
     const accidentSwitch = document.getElementById("toggleAccidents");
     accidentSwitch.addEventListener("change", async function () {
         console.log("Accident layer toggle changed:", this.checked);
@@ -67,52 +111,117 @@ window.renderPage = async function () {
         }
     });
 
+    // Road Network Toggle
     const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
-    roadNetworkSwitch.addEventListener("click", function () {
-        const willBeActive = !this.classList.contains("active");
+    roadNetworkSwitch.addEventListener("change", function () {
         if (window.saafr.store.isRoadNetworkLayerVisible()) {
             window.saafr.store.map.removeLayer(window.saafr.store.getRoadNetworkLayer());
         }
-        window.saafr.store.setRoadNetworkLayerVisibility(willBeActive);
-        if (willBeActive) {
+        window.saafr.store.setRoadNetworkLayerVisibility(this.checked);
+        if (this.checked) {
             window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
         }
-        this.classList.toggle("active");
+    });
+
+    // Location "Here I Am" button
+    const locateMeBtn = document.getElementById("locateMeBtn");
+    let locationMarker = null;
+
+    locateMeBtn.addEventListener("click", function () {
+        const btn = this;
+        const map = window.saafr.store.map;
+        if (!map) return;
+
+        // Show loading state
+        btn.classList.add("locating");
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            btn.classList.remove("locating");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Remove previous location marker
+                if (locationMarker) map.removeLayer(locationMarker);
+
+                // Add location marker (blue dot like Google Maps)
+                locationMarker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    color: '#fff',
+                    fillColor: '#4285f4',
+                    fillOpacity: 1,
+                    weight: 3
+                }).addTo(map);
+
+                // Zoom to location
+                map.setView([lat, lng], 16);
+
+                // Update start input in routing form
+                const startInput = document.getElementById("startInput");
+                if (startInput) {
+                    startInput.value = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+                }
+
+                // Update button state
+                btn.classList.remove("locating");
+                btn.classList.add("active");
+
+                // Store location reference
+                window.saafr.store.userLocation = { lat, lng };
+            },
+            function (error) {
+                btn.classList.remove("locating");
+                let message = "Unable to get your location.";
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = "Location access denied. Please enable location permissions.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = "Location information unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        message = "Location request timed out.";
+                        break;
+                }
+                alert(message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
     });
 
     //window.saafr.map.initLayerToggles(window.saafr.store);
 };
 window.unmountPage = function () {
-    // 1. Layer Modal aufräumen
-    const layerModalEl = document.getElementById("layerModal");
-    if (layerModalEl) {
-        const inst = bootstrap.Modal.getInstance(layerModalEl);
-        if (inst) {
-            inst.hide();
-            inst.dispose();
-        }
-        layerModalEl.remove(); // WICHTIG: Element aus dem Body entfernen
+    // 1. Close layers bottom sheet if open
+    const layersBottomSheet = document.getElementById("layersBottomSheet");
+    const layersSheetBackdrop = document.getElementById("layersSheetBackdrop");
+    if (layersBottomSheet) {
+        layersBottomSheet.classList.remove('open');
+    }
+    if (layersSheetBackdrop) {
+        layersSheetBackdrop.classList.remove('open');
     }
 
-    // 2. Routing Modal aufräumen
-    const routingModalEl = document.getElementById("routingModal");
-    if (routingModalEl) {
-        const inst = bootstrap.Modal.getInstance(routingModalEl);
-        if (inst) {
-            inst.hide();
-            inst.dispose();
-        }
-        routingModalEl.remove(); // WICHTIG: Element aus dem Body entfernen
+    // 2. Close routing bottom sheet if open
+    const routingBottomSheet = document.getElementById("routingBottomSheet");
+    const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
+    if (routingBottomSheet) {
+        routingBottomSheet.classList.remove('open');
+    }
+    if (routingSheetBackdrop) {
+        routingSheetBackdrop.classList.remove('open');
     }
 
-    // 3. Modal-Backdrops entfernen (falls welche hängen geblieben sind)
-    document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
-    document.body.classList.remove("modal-open");
-    document.body.style.removeProperty("padding-right");
-
-    // 4. KARTE ENTFERNEN (Der Hauptfehler)
-    // Hier stand vorher "window.routingStore", das existiert aber nicht.
-    // Es muss "window.saafr.store" heißen.
+    // 3. KARTE ENTFERNEN
     if (window.saafr && window.saafr.store && window.saafr.store.map) {
         window.saafr.store.map.remove(); // Zerstört die Leaflet-Instanz
         window.saafr.store.map = null;   // Setzt die Referenz im Store auf null

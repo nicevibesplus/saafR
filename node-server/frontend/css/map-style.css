@@ -118,39 +118,117 @@ body {
 }
 
 /* ========================================
-   BOTTOM ROUTING BUTTON
+   BOTTOM BAR (Time, Routing, Location)
    ======================================== */
 
-.bottom-button-container {
+.bottom-bar-center {
     position: absolute;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.routing-button {
+.bottom-bar-center.hidden {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bottom-bar-item {
     background: white;
     color: #495057;
     border: none;
-    padding: 12px 32px;
+    padding: 12px 20px;
     border-radius: 25px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bottom-bar-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.time-display {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    z-index: 1000;
+    cursor: default;
+    padding: 12px 16px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.time-display:hover {
+    transform: none;
+}
+
+.time-display.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.routing-button {
+    padding: 12px 24px;
 }
 
 .routing-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .routing-button:active {
     transform: scale(0.98);
+}
+
+.location-btn {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    z-index: 1000;
+    padding: 12px 14px;
+    border-radius: 50%;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.location-btn:hover {
+    transform: scale(1.1);
+}
+
+.location-btn:active {
+    transform: scale(0.95);
+}
+
+.location-btn.active {
+    color: #4285f4;
+}
+
+.location-btn.locating {
+    animation: pulse-location 1.5s infinite;
+}
+
+.location-btn.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes pulse-location {
+    0% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(66, 133, 244, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
 }
 
 /* "Choose on map" Buttons */
@@ -179,6 +257,236 @@ body {
 .btn-pick-map:active {
     transform: translateY(0);
     background: #5a0f6f;
+}
+
+
+/* ========================================
+   ROUTING TOP SHEET (Slides from top)
+   ======================================== */
+
+.routing-sheet-wrapper {
+    position: fixed;
+    top: 62px; /* Below navbar + padding */
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 1100;
+    pointer-events: none;
+    height: calc(100vh - 62px);
+}
+
+.routing-bottom-sheet {
+    position: relative;
+    background: white;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    pointer-events: auto;
+}
+
+.routing-bottom-sheet.open {
+    transform: translateY(0);
+}
+
+.routing-sheet-backdrop {
+    position: fixed;
+    top: 62px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 1099;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.routing-sheet-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.routing-sheet-content {
+    padding: 20px;
+}
+
+.routing-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.routing-sheet-header span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+}
+
+
+/* ========================================
+   LAYERS BOTTOM SHEET (Google Maps Style)
+   ======================================== */
+
+.layers-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    z-index: 1100;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.layers-bottom-sheet.open {
+    transform: translateY(0);
+}
+
+.layers-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 1099;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.layers-sheet-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.layers-sheet-content {
+    padding: 15px 20px;
+}
+
+.layers-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.layers-sheet-header span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.layers-row {
+    display: flex;
+    gap: 20px;
+}
+
+.map-type-section {
+    flex-shrink: 0;
+}
+
+.layers-toggles-section {
+    flex: 1;
+}
+
+.layers-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+/* Map Type Options (Light/Dark) */
+.map-type-options {
+    display: flex;
+    gap: 8px;
+}
+
+.map-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.map-type-option:hover {
+    background: #f8f9fa;
+}
+
+.map-type-option.active {
+    border-color: #4285f4;
+    background: #e8f0fe;
+}
+
+.map-type-preview {
+    width: 50px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.map-type-preview.light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.map-type-preview.dark {
+    background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+}
+
+.map-type-option span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.map-type-option.active span {
+    color: #4285f4;
+}
+
+/* Layer Toggle Items */
+.layer-toggle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.layer-toggle-item:last-child {
+    padding-bottom: 0;
+}
+
+.layer-toggle-item span {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #212529;
+}
+
+.layer-toggle-item .form-check {
+    margin: 0;
+    padding: 0;
+}
+
+.layer-toggle-item .form-check-input {
+    width: 36px;
+    height: 20px;
+    margin: 0;
 }
 
 
@@ -365,6 +673,74 @@ body {
     transition: all 0.2s ease;
 }
 
+/* ========================================
+   ROUTING INPUTS STYLING
+   ======================================== */
+
+.routing-inputs-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.routing-inputs-container .input-group {
+    margin-bottom: 10px;
+}
+
+.routing-inputs-container .input-group:last-of-type {
+    margin-bottom: 12px;
+}
+
+.routing-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.routing-actions .btn-close {
+    margin-left: auto;
+}
+
+.fab-inline-sm {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #495057;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.fab-inline-sm:hover {
+    background: #f8f9fa;
+}
+
+.routing-go-btn {
+    background: white !important;
+    color: #495057 !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 25px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.routing-go-btn:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* Allow map interaction when routing modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
 /* Start Routing Button (Routing Modal) */
 #routingModal .modal-footer .btn-primary,
 #routeBtn {
@@ -423,67 +799,14 @@ body {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 320px;
+  width: 200px;
   z-index: 1050;
-}
-
-.route-steps {
-  max-height: calc(2 * 3.5rem); /* initially 2 steps */
-  overflow-y: auto;
-
-  padding: 0;
-  margin: 0;
-
-  scroll-behavior: smooth;
-
-  /* smooth expand */
-  transition: max-height 420ms cubic-bezier(0.25, 0.8, 0.25, 1);
-  will-change: max-height;
-}
-
-/* enable snap ONLY after expansion */
-.route-steps.expanded {
-  scroll-snap-type: y proximity;
-}
-
-.route-steps .list-group-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  opacity: 0;
-  transform: translateY(12px);
-  animation: stepFadeIn 0.35s ease forwards;
-}
-
-@keyframes stepFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.route-icon i {
-  font-size: 1.25rem;
-  color: #000;
-  width: 28px;
-  text-align: center;
 }
 
 .route-info-panel .card {
   border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-}
-
-
-.navigation-panel {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  max-height: 250px;
-  overflow-y: auto;
-  z-index: 1000;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 
 /* ========================================
