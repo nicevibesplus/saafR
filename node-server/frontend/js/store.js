@@ -111,12 +111,43 @@ window.saafr.store = {
         this.layers.accidents[0] = isVisible;
     },
 
-    getAnxietyZonesLayer: function () {
+    getAnxietyZonesLayer: async function () {
         if (!this.layers.anxietyZones[1]) {
-            this.layers.anxietyZones[1] = L.layerGroup();
-        }
+            const response = await fetch('http://localhost:3000/get_anxiety_areas');
+            const data = await response.json();
+            console.log(data);
+
+            this.layers.anxietyZones[1] = L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    // Leaflet already converts GeoJSON coords correctly
+                    return L.circleMarker(latlng, {
+                        radius: 6,
+                        fillColor: "#ffc107",
+                        color: "#fff",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+            onEachFeature: function (feature, layer) {
+                if (!feature.properties) return;
+
+                let popupContent = '<div style="font-family: Arial; font-size: 14px;">';
+                popupContent += '<strong>' + (feature.properties.name ?? 'Anxiety Zone') + '</strong><br>';
+                popupContent += 'Likes: ';
+                popupContent += '<span id="likesDisplay-' + feature.properties.uuid + '">';
+                popupContent += feature.properties.likes;
+                popupContent += '</span><br>';
+                popupContent += '</div>';
+
+                layer.bindPopup(popupContent);
+            }
+        });
+    }
+
         return this.layers.anxietyZones[1];
     },
+
 
     isAnxietyZonesLayerVisible: function () {
         return this.layers.anxietyZones[0];

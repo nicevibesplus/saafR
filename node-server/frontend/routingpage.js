@@ -111,6 +111,20 @@ window.renderPage = async function () {
         }
     });
 
+    let anxietySwitch = document.getElementById("toggleAnxietyZones");
+    anxietySwitch.addEventListener("change", async function () {
+        console.log("Anxiety layer toggle changed:", this.checked);
+        console.log("Current is visible:", window.saafr.store.isAnxietyZonesLayerVisible());
+        if (window.saafr.store.isAnxietyZonesLayerVisible()) {
+            window.saafr.store.map.removeLayer(await window.saafr.store.getAnxietyZonesLayer());
+        }
+        window.saafr.store.setAnxietyZonesLayerVisibility(this.checked);
+        console.log("New is visible:", window.saafr.store.isAnxietyZonesLayerVisible());
+        if (this.checked) {
+            window.saafr.store.map.addLayer(await window.saafr.store.getAnxietyZonesLayer());
+        }
+    });
+
     // Road Network Toggle
     const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
     roadNetworkSwitch.addEventListener("change", function () {
@@ -122,6 +136,8 @@ window.renderPage = async function () {
             window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
         }
     });
+
+    
 
     // Location "Here I Am" button
     const locateMeBtn = document.getElementById("locateMeBtn");
