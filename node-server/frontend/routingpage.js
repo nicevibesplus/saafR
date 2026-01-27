@@ -22,7 +22,6 @@ window.renderPage = async function () {
     const openRoutingBtn = document.getElementById("openRoutingBtn");
     const routingBottomSheet = document.getElementById("routingBottomSheet");
     const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
-    const closeRoutingSheet = document.getElementById("closeRoutingSheet");
     const bottomBarCenter = document.querySelector('.bottom-bar-center');
     const routeTimeDisplay = document.getElementById("routeTimeDisplay");
     const locationBtn = document.getElementById("locateMeBtn");
@@ -46,9 +45,8 @@ window.renderPage = async function () {
     // Store close function globally for use after routing
     window.saafr.closeRoutingSheet = closeRoutingSheetFn;
 
-    openRoutingBtn.addEventListener("click", openRoutingSheetFn);
-    closeRoutingSheet.addEventListener("click", closeRoutingSheetFn);
-    routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
+    if (openRoutingBtn) openRoutingBtn.addEventListener("click", openRoutingSheetFn);
+    if (routingSheetBackdrop) routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
 
     // Layers Bottom Sheet
     const layersBtn = document.getElementById("layersBtn");
