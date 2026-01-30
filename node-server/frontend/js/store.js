@@ -119,7 +119,6 @@ window.saafr.store = {
 
             this.layers.anxietyZones[1] = L.geoJSON(data, {
                 pointToLayer: function (feature, latlng) {
-                    // Leaflet already converts GeoJSON coords correctly
                     return L.circleMarker(latlng, {
                         radius: 6,
                         fillColor: "#ffc107",
