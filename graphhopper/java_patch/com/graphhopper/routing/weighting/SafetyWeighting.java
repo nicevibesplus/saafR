@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 public class SafetyWeighting implements Weighting {
     private static final Logger LOGGER = Logger.getLogger(SafetyWeighting.class.getName());
@@ -52,7 +53,7 @@ public class SafetyWeighting implements Weighting {
         LOGGER.info("SafetyWeighting hints: " + hints.toString());
         this.includeCrashes = hints.getBool("include_crashes", false);
         this.includeAnxiety = hints.getBool("include_anxiety", false);
-        this.reqTime = hints.getTimestamp("req_time", null);
+        this.reqTime = LocalDateTime.parse(hints.getString("req_time", null));
 
         LOGGER.info("SafetyWeighting with hints: include_crashes=" + this.includeCrashes
             + ", include_anxiety=" + this.includeAnxiety
@@ -60,7 +61,7 @@ public class SafetyWeighting implements Weighting {
         );
     }
 
-    private double getAccidentWeightMultiplier(EdgeIteratorState edgeState, long osmId) {
+    private double getAccidentWeightMultiplier(EdgeIteratorState edgeState, long osmId, String accLog) {
     
 
         List<AccidentData> segmentAccidents = accidents.get(osmId);
@@ -72,7 +73,7 @@ public class SafetyWeighting implements Weighting {
 
         boolean reqIsWeekend = this.reqTime.getDayOfWeek().getValue() == 6 || this.reqTime.getDayOfWeek().getValue() == 7;
 
-        String accLog = "Edge OSM ID: " + osmId + " has " + segmentAccidents.size() + " accidents. Details:\n";
+        accLog = " has " + segmentAccidents.size() + " accidents. Details:\n";
         for (AccidentData acc : segmentAccidents) {
             
             // year recency
@@ -119,12 +120,36 @@ public class SafetyWeighting implements Weighting {
         accLog += String.format("  => Total accident score for edge OSM ID %d: %.2f\n", osmId, totalScore);
 
         double cappedScore = Math.min(totalScore, 10.0);
-        String.format("  => Capped accident score for edge OSM ID %d: %.2f\n", osmId, cappedScore);
+        accLog += String.format("  => Capped accident score for edge OSM ID %d: %.2f\n", osmId, cappedScore);
         return 1.0 + cappedScore;
     }
 
-    private double getAnxietyWeightMultiplier(EdgeIteratorState edgeState) {
-        return 1.0; // Placeholder, hier kannst du eine Logik einfügen, um den Multiplikator basierend auf Angstdaten zu berechnen
+    private double getAnxietyWeightMultiplier(EdgeIteratorState edgeState, long osmId, String accLog) {
+        List<AnxietyData> segmentAnxieties = anxieties.get(osmId);
+        if (segmentAnxieties == null || segmentAnxieties.isEmpty()) {
+            return 1.0;
+        }
+
+        double totalScore = 0.0;
+        accLog += " has " + segmentAnxieties.size() + " anxiety zones. Details:\n";
+        for(AnxietyData anx : segmentAnxieties) {
+            double score = 0.0;
+            if (this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue())) {
+                if (!anx.lighting) {
+                    score += 0.2;
+                }
+                score += anx.severity * 0.5;
+            }
+            accLog += String.format("  Anxiety Zone: isActive=%b, severity=%.2f, lighting=%b, impact=%.2f\n",
+                this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue()),
+                anx.severity, anx.lighting, score);
+            totalScore += score;
+        }
+        accLog += String.format("  => Total anxiety score for edge OSM ID %d: %.2f\n", osmId, totalScore);
+
+        double cappedScore = Math.min(totalScore, 10.0);
+        accLog += String.format("  => Capped accident score for edge OSM ID %d: %.2f\n", osmId, cappedScore);
+        return 1.0 + cappedScore;
     }
 
     @Override
@@ -142,14 +167,16 @@ public class SafetyWeighting implements Weighting {
             return weight;
         }
 
+        String accLog = "Edge OSM ID: " + osmId;
+
         if (includeCrashes && accidents != null) {
-            weight = getAccidentWeightMultiplier(edgeState, osmId) * weight;
+            weight = getAccidentWeightMultiplier(edgeState, osmId, accLog) * weight;
         }
 
         if (includeAnxiety && anxieties != null) {
-            weight = getAnxietyWeightMultiplier(edgeState, osmId) * weight;
+            weight = getAnxietyWeightMultiplier(edgeState, osmId, accLog) * weight;
         }
-        
+
         accLog += String.format("  Final weight: %.2f", weight);
         LOGGER.info(accLog);
         return weight;

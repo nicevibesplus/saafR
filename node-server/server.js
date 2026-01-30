@@ -264,6 +264,7 @@ app.post('/routing_customGH', async (req, res) => {
             start, 
             end,
             include_crashes,
+            include_anxiety
         } = req.body;
         
         const { lat: start_lat, lng: start_lng } = start;
@@ -277,13 +278,9 @@ app.post('/routing_customGH', async (req, res) => {
         params.append('points_encoded', false);
         params.append('instructions', true);
         params.append('include_crashes', include_crashes);
-        if (include_crashes) {
-            const date = new Date();
-            params.append('req_year', date.getFullYear());
-            params.append('req_month', date.getMonth() + 1);
-            params.append('req_hour', date.getHours());
-            params.append('req_weekday', date.getDay());
-        }
+        params.append('include_anxiety', include_anxiety);
+        const date = LocalDateTime.now();
+        params.append('req_time', date.toString());
 
         const url = `http://graphhopper:8989/route?${params.toString()}`;
 

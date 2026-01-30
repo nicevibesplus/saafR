@@ -3,6 +3,7 @@ package com.graphhopper.routing.weighting;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.time.LocalTime;
 
 public class AnxietyRegistry {
     private static final Logger LOGGER = Logger.getLogger(AnxietyRegistry.class.getName());
@@ -37,9 +38,9 @@ public class AnxietyRegistry {
                 while (rs.next()) {
                     long osmId = rs.getLong("osm_id");
                     AnxietyData data = new AnxietyData(
-                        rs.getTimestamp("start_time").toLocalDateTime(),
-                        rs.getTimestamp("end_time").toLocalDateTime(),
-                        rs.getInt("active_days"),
+                        LocalTime.parse(rs.getString("start_time")),
+                        LocalTime.parse(rs.getString("end_time")),
+                        (int[]) rs.getArray("active_days").getArray(),
                         rs.getBoolean("lighting"),
                         rs.getInt("likes"),
                         rs.getInt("severity")
