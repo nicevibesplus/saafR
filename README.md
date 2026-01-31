@@ -1,4 +1,4 @@
-<img src="./node-server/frontend/pictures/loading_saafR_logo.gif" align="right" width="100" />
+<img src=".\node-server\frontend\pictures\saafR_logo_black.png" align="right" width="300" />
 
 # saafR
 saafR (safe accident and anxiety free routing) is a specialized routing application for bikes designed to prioritize rider comfort and physical safety over the fastest path. While traditional routers focus on the shortest distance, saafR calculates routes by evaluating the safety of every street in Münster.
