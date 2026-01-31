@@ -107,22 +107,8 @@ Content-Type: application/json
 POST http://localhost:3000/upload-anxiety-areas
 Content-Type: application/json
 
-{"severity":3,
-"active_days":["Tuesday","Thursday","Friday","Sunday"],
-"active_time_start": "4:00",
-"active_time_end": "12:00",
-"location_type":"Street",
-"trigger_type":["Complex Navigation", "Dark"],
-"lighting":2,
-"remark":"Test remark",
-"likes":0,
-"geometry":{"type":"Point","coordinates":[7.642364501953126,51.96933645806147]}}
+{"severity":3,"active_days":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"active_time_start":null,"active_time_end":null,"location_type":"Park","trigger_type":["Poor Visibility","Alcohol"],"lighting":2,"remark":"","likes":0,"geometry":{"type":"Polygon","coordinates":[[[7.637954685723149,51.95732076590641],[7.637943957631414,51.957324074199086],[7.638534002676517,51.95724136680916],[7.638598371226886,51.95702963519565],[7.637874225035197,51.95685098586899]]]}}
 
-{"severity":4,
-"active_days":["Monday","Wednesday"],
-"active_time_start":"04:00",
-"active_time_end":"08:00","location_type":"Park",
-"trigger_type":"Narrow Lanes,Complex Navigation,Merging Traffic,Weather Conditions","lighting":1,"remark":"Dark Place","likes":0,"geometry":{"type":"Point","coordinates":[7.630691528320313,51.97007675567706]}}
 
 ###
 

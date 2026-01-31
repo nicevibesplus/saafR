@@ -28,14 +28,15 @@
     };
 
     window.saafr.routing.requestRoute = async function (start, end) {
+        const accEl = document.getElementById('routingToggleAccidents');
+        const includeCrashes = accEl ? !!accEl.checked : true;
         const response = await fetch("http://localhost:3000/routing_customGH", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 start: start,
                 end: end,
-                include_crashes: true,
-                include_anxiety: true
+                include_crashes: includeCrashes
             })
         });
         return await response.json();

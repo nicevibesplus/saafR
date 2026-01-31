@@ -35,66 +35,71 @@ window.renderPage = async function () {
             if (window.addPageStore.anxietyLayer) {
                 map.removeLayer(window.addPageStore.anxietyLayer);
             }
-            
+
             const anxietyLayer = L.geoJSON(geojsonData, {
-                style: function(feature) {
-                    return {
-                        color: '#ffc107',
-                        weight: 2,
-                        fillOpacity: 0.4
-                    };
-                },
-                pointToLayer: function(feature, latlng) {
+                // Point-Features
+                pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: '#ffc107',
-                        color: '#000',
-                        weight: 1,
+                        radius: 6,
+                        fillColor: "#ffc107",
+                        color: "#fff",
+                        weight: 2,
                         opacity: 1,
-                        fillOpacity: 0.6
+                        fillOpacity: 0.8
                     });
                 },
-                onEachFeature: function(feature, layer) {
-                    // Make each feature clickable
-                    layer.on('click', function(e) {
+                // Polygon- and LineString-Features
+                style: function (feature) {
+                    return {
+                        fillColor: "#ffc107",
+                        color: "#ff9800",
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.5
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.on('click', function (e) {
                         showAnxietyZonePopup(feature, layer);
                     });
                 }
             });
-            
+
             anxietyLayer.addTo(map);
             window.addPageStore.anxietyLayer = anxietyLayer;
+
         } catch (error) {
             console.error('Error loading anxiety zones:', error);
         }
     }
 
+
     // Load anxiety zones on page load
     loadAnxietyZones();
 
-    
+
 
     function showAnxietyZonePopup(feature, layer) {
         const props = feature.properties
-        
+
         // Build trigger tags display
         let triggers = props.trigger_type || [];  // already an array
-        let triggersHTML = triggers.map(t => 
+        let triggersHTML = triggers.map(t =>
             `<span class="badge bg-primary me-1 mb-1">${t.trim()}</span>`
         ).join('');
 
-        
+
         // Build active days display
         const days = props.active_days || [];
-        const daysHTML = days.length === 7 ? 
-            '<span class="text-muted">All days</span>' : 
+        const daysHTML = days.length === 7 ?
+            '<span class="text-muted">All days</span>' :
             days.join(', ');
-        
+
         // Build time display
         const timeHTML = (!props.active_time_start && !props.active_time_end) ?
             '<span class="text-muted">All day</span>' :
             `${props.active_time_start || '00:00'} - ${props.active_time_end || '23:59'}`;
-        
+
         // Severity label
         const severityLabels = {
             1: 'Very Low',
@@ -103,14 +108,14 @@ window.renderPage = async function () {
             4: 'High',
             5: 'Very High'
         };
-        
+
         // Lighting label
         const lightingLabels = {
             1: 'Poor',
             2: 'Moderate',
             3: 'Good'
         };
-        
+
         const popupContent = `
             <div class="anxiety-popup" style="min-width: 280px;">
                 <h6 class="mb-2 pb-2 border-bottom">
@@ -168,7 +173,7 @@ window.renderPage = async function () {
                 </div>
             </div>
         `;
-        
+
         layer.bindPopup(popupContent, {
             maxWidth: 350,
             className: 'anxiety-zone-popup'
@@ -177,25 +182,25 @@ window.renderPage = async function () {
 
 
     // Like/Dislike Handler
-    window.increaseLikes = async function(zoneId, buttonElement) {
+    window.increaseLikes = async function (zoneId, buttonElement) {
         // Disable button during request
         buttonElement.disabled = true;
-        
+
         try {
             const response = await fetch(`http://localhost:3000/increase_community_rating`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uuid: zoneId })
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
-                
+
                 // Update the display immediately
                 const likesDisplay = document.getElementById(`likesDisplay-${zoneId}`);
                 if (likesDisplay) {
                     likesDisplay.textContent = data.newLikes;
-                    
+
                     // Update badge color
                     likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
                 }
@@ -206,12 +211,12 @@ window.renderPage = async function () {
                     buttonElement.classList.remove('active');
                     buttonElement.disabled = false;
                 }, 300);
-                
+
             } else {
                 alert('Error updating rating. Please try again.');
                 buttonElement.disabled = false;
             }
-            
+
         } catch (error) {
             console.error('Error updating likes:', error);
             alert('Network error. Please check your connection.');
@@ -219,12 +224,12 @@ window.renderPage = async function () {
         }
     };
 
-    window.decreaseLikes = async function(zoneId, buttonElement, likeNumber) {
+    window.decreaseLikes = async function (zoneId, buttonElement, likeNumber) {
         // Disable button during request
         buttonElement.disabled = true;
-        
+
         try {
-            if (likeNumber <= 0){
+            if (likeNumber <= 0) {
                 alert('Cannot decrease rating below zero.');
             }
             else {
@@ -233,15 +238,15 @@ window.renderPage = async function () {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ uuid: zoneId })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     // Update the display immediately
                     const likesDisplay = document.getElementById(`likesDisplay-${zoneId}`);
                     if (likesDisplay) {
                         likesDisplay.textContent = data.newLikes;
-                        
+
                         // Update badge color
                         likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
                     }
@@ -254,17 +259,17 @@ window.renderPage = async function () {
                     }, 300);
 
                     loadAnxietyZones();
-                    
+
                 } else {
                     alert('Error updating rating. Please try again.');
                     buttonElement.disabled = false;
                 }
             }
-                
+
         } catch (error) {
-                console.error('Error updating likes:', error);
-                alert('Network error. Please check your connection.');
-                buttonElement.disabled = false;
+            console.error('Error updating likes:', error);
+            alert('Network error. Please check your connection.');
+            buttonElement.disabled = false;
         }
     };
 
@@ -280,35 +285,35 @@ window.renderPage = async function () {
     let tempPolygon = null;
 
     // Point drawing button
-    document.getElementById('drawPointBtn').addEventListener('click', function() {
+    document.getElementById('drawPointBtn').addEventListener('click', function () {
         activateDrawingMode('point');
     });
 
     // Polygon drawing button
-    document.getElementById('drawPolygonBtn').addEventListener('click', function() {
+    document.getElementById('drawPolygonBtn').addEventListener('click', function () {
         activateDrawingMode('polygon');
     });
 
     // Cancel drawing button
-    document.getElementById('cancelDrawBtn').addEventListener('click', function() {
+    document.getElementById('cancelDrawBtn').addEventListener('click', function () {
         cancelDrawing();
     });
 
     // Finish drawing button
-    document.getElementById('finishDrawBtn').addEventListener('click', function() {
+    document.getElementById('finishDrawBtn').addEventListener('click', function () {
         if (window.addPageStore.drawingMode === 'polygon' && isDrawing && polygonPoints.length >= 3) {
             if (tempPolygon) {
                 map.removeLayer(tempPolygon);
             }
-            
+
             const polygon = L.polygon(polygonPoints, {
                 color: '#3388ff',
                 weight: 2,
                 fillOpacity: 0.3
             }).addTo(window.addPageStore.drawnItems);
-            
+
             showDataInputModal('polygon', polygon);
-            
+
             isDrawing = false;
             polygonPoints = [];
             cancelDrawing();
@@ -318,7 +323,7 @@ window.renderPage = async function () {
     function activateDrawingMode(mode) {
         window.addPageStore.drawingMode = mode;
         document.getElementById('drawingControls').classList.remove('d-none');
-        
+
         // Update button states
         document.querySelectorAll('.draw-fab').forEach(btn => btn.classList.remove('active'));
         if (mode === 'point') {
@@ -337,18 +342,18 @@ window.renderPage = async function () {
         polygonPoints = [];
         window.addPageStore.drawingMode = null;
         map.getContainer().style.cursor = '';
-        
+
         if (tempPolygon) {
             map.removeLayer(tempPolygon);
             tempPolygon = null;
         }
-        
+
         document.getElementById('drawingControls').classList.add('d-none');
         document.querySelectorAll('.draw-fab').forEach(btn => btn.classList.remove('active'));
     }
 
     // Map click handler for drawing
-    map.on('click', function(e) {
+    map.on('click', function (e) {
         if (window.addPageStore.drawingMode === 'point') {
             // Draw point
             const customIcon = L.icon({
@@ -359,18 +364,18 @@ window.renderPage = async function () {
                 popupAnchor: [1, -34],
                 shadowSize: [41, 41]
             });
-            const marker = L.marker(e.latlng, {icon: customIcon}).addTo(window.addPageStore.drawnItems);
+            const marker = L.marker(e.latlng, { icon: customIcon }).addTo(window.addPageStore.drawnItems);
             showDataInputModal('point', marker);
             cancelDrawing();
         } else if (window.addPageStore.drawingMode === 'polygon' && isDrawing) {
             // Add point to polygon
             polygonPoints.push(e.latlng);
-            
+
             // Draw temporary polygon
             if (tempPolygon) {
                 map.removeLayer(tempPolygon);
             }
-            
+
             if (polygonPoints.length > 2) {
                 tempPolygon = L.polygon(polygonPoints, {
                     color: '#ff7800',
@@ -387,22 +392,22 @@ window.renderPage = async function () {
     });
 
     // Finish polygon drawing on double click
-    map.on('dblclick', function(e) {
+    map.on('dblclick', function (e) {
         if (window.addPageStore.drawingMode === 'polygon' && isDrawing && polygonPoints.length >= 3) {
             L.DomEvent.stop(e);
-            
+
             if (tempPolygon) {
                 map.removeLayer(tempPolygon);
             }
-            
+
             const polygon = L.polygon(polygonPoints, {
                 color: '#3388ff',
                 weight: 2,
                 fillOpacity: 0.3
             }).addTo(window.addPageStore.drawnItems);
-            
+
             showDataInputModal('polygon', polygon);
-            
+
             isDrawing = false;
             polygonPoints = [];
             cancelDrawing();
@@ -411,9 +416,9 @@ window.renderPage = async function () {
 
     function showDataInputModal(geometryType, feature) {
         window.addPageStore.currentDrawing = feature;
-        
+
         const modal = new bootstrap.Modal(document.getElementById('dataInputModal'));
-        
+
         // Clear form
         document.getElementById('dataForm').reset();
 
@@ -431,132 +436,143 @@ window.renderPage = async function () {
         // Reset "Always Active" to default
         document.getElementById('alwaysActive').checked = true;
         document.getElementById('alwaysActive').dispatchEvent(new Event('change'));
-        
+
         modal.show();
     }
 
     // Save data button
-    document.getElementById('saveDataBtn').addEventListener('click', async function() {
-      const feature = window.addPageStore.currentDrawing;
-      if (!feature) return;
-      
-      // Validate form
-      const form = document.getElementById('dataForm');
-      if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-      }
-      
-      // Collect active days
-      const activeDays = [];
-      const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
-      const alwaysActiveChecked = document.getElementById('alwaysActive').checked;
+    document.getElementById('saveDataBtn').addEventListener('click', async function () {
+        const feature = window.addPageStore.currentDrawing;
+        if (!feature) return;
 
-      if (alwaysActiveChecked) {
-          // If "Always Active" is checked, include all days
-          activeDays.push('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-      } else {
-          // Otherwise, only include checked days
-          dayCheckboxes.forEach(id => {
-              const checkbox = document.getElementById(id);
-              if (checkbox.checked) {
-                  activeDays.push(checkbox.value);
-              }
-          });
-      }               
-      
-      
-      // Collect form data
-      let trigger_type_string = document.getElementById('triggerType').value
-      let trigger_type_array = trigger_type_string.split(",")
-      const formData = {
-          severity: parseInt(document.getElementById('anxietySeverity').value),
-          active_days: activeDays,
-          active_time_start: document.getElementById('timeStart').value || null,
-          active_time_end: document.getElementById('timeEnd').value || null,
-          location_type: document.getElementById('locationType').value,
-          trigger_type: trigger_type_array,
-          lighting: parseInt(document.getElementById('lighting').value),
-          remark: document.getElementById('remark').value,
-          likes: 0,
-          geometry: null
-      };
-      
-      // Extract geometry
-      if (feature instanceof L.Marker) {
-          const latlng = feature.getLatLng();
-          formData.geometry = {
-              type: 'Point',
-              coordinates: [latlng.lng, latlng.lat]
-          };
-      } else if (feature instanceof L.Polygon) {
-          const latlngs = feature.getLatLngs()[0];
-          formData.geometry = {
-              type: 'Polygon',
-              coordinates: [latlngs.map(ll => [ll.lng, ll.lat])]
-          };
-      }
-      
-      console.log('Data to save:', formData);
-      console.log(JSON.stringify(formData));
-    
-      try {
-          const response = await fetch('/upload-anxiety-areas', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formData)
-          });
-          if (response.ok) {
-              alert('Data saved successfully!');
-          }
-      } catch (error) {
-          console.error('Save error:', error);
-          alert('Error saving data. Check console.');
-      }
-      
-    loadAnxietyZones();
-      // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();   
+        // Validate form
+        const form = document.getElementById('dataForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Collect active days
+        const activeDays = [];
+        const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
+        const alwaysActiveChecked = document.getElementById('alwaysActive').checked;
+
+        if (alwaysActiveChecked) {
+            activeDays.push('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+        } else {
+            dayCheckboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox.checked) {
+                    activeDays.push(checkbox.value);
+                }
+            });
+        }
+
+        // Collect form data
+        let trigger_type_string = document.getElementById('triggerType').value;
+        let trigger_type_array = trigger_type_string.split(",");
+        const formData = {
+            severity: parseInt(document.getElementById('anxietySeverity').value),
+            active_days: activeDays,
+            active_time_start: document.getElementById('timeStart').value || null,
+            active_time_end: document.getElementById('timeEnd').value || null,
+            location_type: document.getElementById('locationType').value,
+            trigger_type: trigger_type_array,
+            lighting: parseInt(document.getElementById('lighting').value),
+            remark: document.getElementById('remark').value,
+            likes: 0,
+            geometry: null
+        };
+
+        // Extract geometry
+        if (feature instanceof L.Marker) {
+            const latlng = feature.getLatLng();
+            formData.geometry = {
+                type: 'Point',
+                coordinates: [latlng.lng, latlng.lat]
+            };
+        } else if (feature instanceof L.Polygon) {
+            const latlngs = feature.getLatLngs()[0];
+            const coords = latlngs.map(ll => [ll.lng, ll.lat]);
+
+            // GeoJSON Polygone is closed
+            if (coords.length > 0 &&
+                (coords[0][0] !== coords[coords.length - 1][0] ||
+                    coords[0][1] !== coords[coords.length - 1][1])) {
+                coords.push(coords[0]);
+            }
+
+            formData.geometry = {
+                type: 'Polygon',
+                coordinates: [coords]
+            };
+        }
+
+        console.log('Data to save:', formData);
+        console.log(JSON.stringify(formData));
+
+        try {
+            const response = await fetch('/upload-anxiety-areas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                // Close modal first
+                bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
+
+                // Show success notification
+                showSavedNotification();
+
+                // Reload anxiety zones to show the new one
+                await loadAnxietyZones();
+            } else {
+                alert('Error saving data. Server returned: ' + response.status);
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Error saving data. Check console.');
+        }
     });
 
-    function showSavedNotification(){
-    let toastEl = document.getElementById('toastdbsuccess');
-    
-    // Create if doesn't exist
-    if (!toastEl) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-                <div class="toast" id="toastdbsuccess">
-                    <div class="toast-header">
-                        <strong class="me-auto">Success</strong>
-                        <small>Just now</small>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        Zone saved successfully!
-                    </div>
+    function showSavedNotification() {
+        let toastEl = document.getElementById('toastdbsuccess');
+
+        // Create if doesn't exist
+        if (!toastEl) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+        <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+            <div class="toast" id="toastdbsuccess">
+                <div class="toast-header">
+                    <strong class="me-auto">Success</strong>
+                    <small>Just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    Zone saved successfully!
                 </div>
             </div>
-        `;
-        document.body.appendChild(wrapper.firstElementChild);
-        toastEl = document.getElementById('toastdbsuccess');
+        </div>
+    `;
+            document.body.appendChild(wrapper.firstElementChild);
+            toastEl = document.getElementById('toastdbsuccess');
+        }
+
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
     }
-    
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
-    }
-    showSavedNotification()
 
 
     // Delete geometry and cancel button
-    document.getElementById('deleteGeometryBtn').addEventListener('click', function() {
+    document.getElementById('deleteGeometryBtn').addEventListener('click', function () {
         const feature = window.addPageStore.currentDrawing;
-        
+
         if (feature) {
             // Remove the drawn feature from the map
             window.addPageStore.drawnItems.removeLayer(feature);
-            
+
             // Clear reference
             window.addPageStore.currentDrawing = null;
         }
@@ -568,11 +584,11 @@ window.renderPage = async function () {
 
 
     // "Always Active" checkbox handler
-    document.getElementById('alwaysActive').addEventListener('change', function() {
+    document.getElementById('alwaysActive').addEventListener('change', function () {
         const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
         const timeStart = document.getElementById('timeStart');
         const timeEnd = document.getElementById('timeEnd');
-        
+
         if (this.checked) {
             // Lock everything to "always active"
             dayCheckboxes.forEach(id => {
@@ -599,9 +615,9 @@ window.renderPage = async function () {
 
     // Trigger on page load to set initial state
     document.getElementById('alwaysActive').dispatchEvent(new Event('change'));
-    
+
     // Severity slider value display
-    document.getElementById('anxietySeverity').addEventListener('input', function() {
+    document.getElementById('anxietySeverity').addEventListener('input', function () {
         const severityLabels = {
             1: '1 - Very Low',
             2: '2 - Low',
@@ -613,7 +629,7 @@ window.renderPage = async function () {
     });
 
     // Lighting slider value display
-    document.getElementById('lighting').addEventListener('input', function() {
+    document.getElementById('lighting').addEventListener('input', function () {
         const lightingLabels = {
             1: 'Poor',
             2: 'Moderate',
@@ -628,9 +644,9 @@ window.renderPage = async function () {
     function updateSelectedTagsDisplay() {
         const container = document.getElementById('selectedTags');
         const hiddenInput = document.getElementById('triggerType');
-        
+
         container.innerHTML = '';
-        
+
         selectedTags.forEach(tag => {
             const tagElement = document.createElement('span');
             tagElement.className = 'selected-tag';
@@ -640,16 +656,16 @@ window.renderPage = async function () {
             `;
             container.appendChild(tagElement);
         });
-        
+
         // Update hidden input with comma-separated values
         hiddenInput.value = Array.from(selectedTags).join(',');
     }
 
     // Predefined tag button clicks
     document.querySelectorAll('.tag-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const tag = this.dataset.tag;
-            
+
             if (selectedTags.has(tag)) {
                 selectedTags.delete(tag);
                 this.classList.remove('active');
@@ -657,33 +673,33 @@ window.renderPage = async function () {
                 selectedTags.add(tag);
                 this.classList.add('active');
             }
-            
+
             updateSelectedTagsDisplay();
         });
     });
 
     // Remove tag from selected display
-    document.getElementById('selectedTags').addEventListener('click', function(e) {
+    document.getElementById('selectedTags').addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-tag')) {
             const tag = e.target.dataset.tag;
             selectedTags.delete(tag);
-            
+
             // Also remove active state from button if it exists
             document.querySelectorAll('.tag-btn').forEach(btn => {
                 if (btn.dataset.tag === tag) {
                     btn.classList.remove('active');
                 }
             });
-            
+
             updateSelectedTagsDisplay();
         }
     });
 
     // Custom tag addition
-    document.getElementById('addCustomTagBtn').addEventListener('click', function() {
+    document.getElementById('addCustomTagBtn').addEventListener('click', function () {
         const input = document.getElementById('customTagInput');
         const customTag = input.value.trim();
-        
+
         if (customTag && !selectedTags.has(customTag)) {
             selectedTags.add(customTag);
             updateSelectedTagsDisplay();
@@ -692,7 +708,7 @@ window.renderPage = async function () {
     });
 
     // Allow Enter key to add custom tag
-    document.getElementById('customTagInput').addEventListener('keypress', function(e) {
+    document.getElementById('customTagInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             document.getElementById('addCustomTagBtn').click();
@@ -701,30 +717,30 @@ window.renderPage = async function () {
 
 
 
-        // Dark mode toggle
-        const darkModeSwitch = document.getElementById("darkModeToggleFAB");
-        let isDarkMode = false;
-        darkModeSwitch.addEventListener("click", function () {
-            isDarkMode = !isDarkMode;
-            // Simple toggle - you can enhance this with your actual dark mode logic
-            if (isDarkMode) {
-                this.querySelector('i').classList.replace('bi-moon-fill', 'bi-sun-fill');
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '© OpenStreetMap, © CartoDB'
-                }).addTo(map);
-            } else {
-                this.querySelector('i').classList.replace('bi-sun-fill', 'bi-moon-fill');
-                map.eachLayer(layer => {
-                    if (layer instanceof L.TileLayer && !layer.wmsParams) {
-                        map.removeLayer(layer);
-                    }
-                });
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-            }
-        });
-    };
+    // Dark mode toggle
+    const darkModeSwitch = document.getElementById("darkModeToggleFAB");
+    let isDarkMode = false;
+    darkModeSwitch.addEventListener("click", function () {
+        isDarkMode = !isDarkMode;
+        // Simple toggle - you can enhance this with your actual dark mode logic
+        if (isDarkMode) {
+            this.querySelector('i').classList.replace('bi-moon-fill', 'bi-sun-fill');
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap, © CartoDB'
+            }).addTo(map);
+        } else {
+            this.querySelector('i').classList.replace('bi-sun-fill', 'bi-moon-fill');
+            map.eachLayer(layer => {
+                if (layer instanceof L.TileLayer && !layer.wmsParams) {
+                    map.removeLayer(layer);
+                }
+            });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+    });
+};
 
 window.unmountPage = function () {
     // Close any open modals

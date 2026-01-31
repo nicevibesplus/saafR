@@ -22,7 +22,6 @@ window.renderPage = async function () {
     const openRoutingBtn = document.getElementById("openRoutingBtn");
     const routingBottomSheet = document.getElementById("routingBottomSheet");
     const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
-    const closeRoutingSheet = document.getElementById("closeRoutingSheet");
     const bottomBarCenter = document.querySelector('.bottom-bar-center');
     const routeTimeDisplay = document.getElementById("routeTimeDisplay");
     const locationBtn = document.getElementById("locateMeBtn");
@@ -46,9 +45,8 @@ window.renderPage = async function () {
     // Store close function globally for use after routing
     window.saafr.closeRoutingSheet = closeRoutingSheetFn;
 
-    openRoutingBtn.addEventListener("click", openRoutingSheetFn);
-    closeRoutingSheet.addEventListener("click", closeRoutingSheetFn);
-    routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
+    if (openRoutingBtn) openRoutingBtn.addEventListener("click", openRoutingSheetFn);
+    if (routingSheetBackdrop) routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
 
     // Layers Bottom Sheet
     const layersBtn = document.getElementById("layersBtn");
@@ -111,6 +109,20 @@ window.renderPage = async function () {
         }
     });
 
+    let anxietySwitch = document.getElementById("toggleAnxietyZones");
+    anxietySwitch.addEventListener("change", async function () {
+        console.log("Anxiety layer toggle changed:", this.checked);
+        console.log("Current is visible:", window.saafr.store.isAnxietyZonesLayerVisible());
+        if (window.saafr.store.isAnxietyZonesLayerVisible()) {
+            window.saafr.store.map.removeLayer(await window.saafr.store.getAnxietyZonesLayer());
+        }
+        window.saafr.store.setAnxietyZonesLayerVisibility(this.checked);
+        console.log("New is visible:", window.saafr.store.isAnxietyZonesLayerVisible());
+        if (this.checked) {
+            window.saafr.store.map.addLayer(await window.saafr.store.getAnxietyZonesLayer());
+        }
+    });
+
     // Road Network Toggle
     const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
     roadNetworkSwitch.addEventListener("change", function () {
@@ -122,6 +134,8 @@ window.renderPage = async function () {
             window.saafr.store.map.addLayer(window.saafr.store.getRoadNetworkLayer());
         }
     });
+
+    
 
     // Location "Here I Am" button
     const locateMeBtn = document.getElementById("locateMeBtn");

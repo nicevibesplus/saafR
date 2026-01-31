@@ -85,9 +85,27 @@
                         <input id="endInput" type="text" class="form-control" placeholder="Destination: lat,lng or address">
                         <button class="fab fab-inline-sm" type="button" id="pickEndBtn" title="Pick on map"><i class="bi bi-geo-alt-fill"></i></button>
                     </div>
-                    <div class="routing-actions">
-                        <button type="button" id="routeBtn" class="btn routing-go-btn">Start Routing</button>
-                        <button type="button" class="btn-close" id="closeRoutingSheet" aria-label="Close"></button>
+                    <!-- Routing-specific toggles (UI-only) -->
+                    <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;">
+                        <div style="flex:1;">
+                            <div class="layer-toggle-item" style="margin:0;">
+                                <span><span class="legend-marker accidents me-2"></span>Accidents</span>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input switch-red" type="checkbox" id="routingToggleAccidents" checked>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <div class="layer-toggle-item" style="margin:0;">
+                                <span><span class="legend-marker anxiety me-2"></span>Anxiety</span>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input switch-yellow" type="checkbox" id="routingToggleAnxiety">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="routing-actions" style="display:flex;justify-content:center;">
+                        <button type="button" id="routeBtn" class="btn routing-go-btn" style="width:200px;text-align:center;">Start Routing</button>
                     </div>
                 </div>
             </div>

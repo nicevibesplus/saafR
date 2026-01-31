@@ -24,7 +24,7 @@ window.saafr.store = {
             this.map = L.map("map", {
                 zoomControl: false
             }).setView([51.9607, 7.6261], 13);
-            
+
             L.control.zoom({
                 position: 'topleft'
             }).addTo(this.map);
@@ -111,12 +111,49 @@ window.saafr.store = {
         this.layers.accidents[0] = isVisible;
     },
 
-    getAnxietyZonesLayer: function () {
+    getAnxietyZonesLayer: async function () {
         if (!this.layers.anxietyZones[1]) {
-            this.layers.anxietyZones[1] = L.layerGroup();
+            const response = await fetch('http://localhost:3000/get_anxiety_areas');
+            const data = await response.json();
+            console.log(data);
+            this.layers.anxietyZones[1] = L.geoJSON(data, {
+                // Point-Features
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 6,
+                        fillColor: "#ffc107",
+                        color: "#fff",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                // Polygon-Features
+                style: function (feature) {
+                    return {
+                        fillColor: "#ffc107",
+                        color: "#ff9800",
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.5
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    if (!feature.properties) return;
+                    let popupContent = '<div style="font-family: Arial; font-size: 14px;">';
+                    popupContent += '<strong>' + (feature.properties.name ?? 'Anxiety Zone') + '</strong><br>';
+                    popupContent += 'Likes: ';
+                    popupContent += '<span id="likesDisplay-' + feature.properties.uuid + '">';
+                    popupContent += feature.properties.likes;
+                    popupContent += '</span><br>';
+                    popupContent += '</div>';
+                    layer.bindPopup(popupContent);
+                }
+            });
         }
         return this.layers.anxietyZones[1];
     },
+
 
     isAnxietyZonesLayerVisible: function () {
         return this.layers.anxietyZones[0];

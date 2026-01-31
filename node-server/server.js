@@ -404,9 +404,26 @@ app.post("/upload-anxiety-areas", async (req, res) => {
         }
     }
 
-    const geomWKT = geometry && geometry.lat != null && geometry.lng != null
-        ? `POINT(${geometry.lng} ${geometry.lat})`
-        : null;
+    let geomWKT = null;
+
+    if (geometry) {
+    // GeoJSON Point
+    if (geometry.type === "Point") {
+        const [lng, lat] = geometry.coordinates;
+        geomWKT = `POINT(${lng} ${lat})`;
+    }
+
+    // GeoJSON Polygon
+    else if (geometry.type === "Polygon") {
+        const ring = geometry.coordinates[0]; // outer ring
+        const coords = ring
+        .map(([lng, lat]) => `${lng} ${lat}`)
+        .join(", ");
+
+        geomWKT = `POLYGON((${coords}))`;
+    }
+    }
+
 
     const query = `
         INSERT INTO anxiety_areas
