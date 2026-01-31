@@ -66,7 +66,7 @@ public class SafetyWeighting implements Weighting {
         );
     }
 
-    private double getAccidentWeightMultiplier(EdgeIteratorState edgeState, long osmId, String accLog) {
+    private double getAccidentWeightMultiplier(EdgeIteratorState edgeState, long osmId) {
     
 
         List<AccidentData> segmentAccidents = accidents.get(osmId);
@@ -78,7 +78,6 @@ public class SafetyWeighting implements Weighting {
 
         boolean reqIsWeekend = this.reqTime.getDayOfWeek().getValue() == 6 || this.reqTime.getDayOfWeek().getValue() == 7;
 
-        accLog = " has " + segmentAccidents.size() + " accidents. Details:\n";
         for (AccidentData acc : segmentAccidents) {
             
             // year recency
@@ -118,25 +117,18 @@ public class SafetyWeighting implements Weighting {
             }
 
             double accidentImpact = (seasonScore + dayScore + timeScore) * recencyFactor;
-            accLog += String.format("  Accident: yearDiff=%d, recencyFactor=%.2f, seasonScore=%.2f, dayScore=%.2f, timeScore=%.2f, totalImpact=%.2f\n",
-                yearDiff, recencyFactor, seasonScore, dayScore, timeScore, accidentImpact);
             totalScore += accidentImpact;
         }
-        accLog += String.format("  => Total accident score for edge OSM ID %d: %.2f\n", osmId, totalScore);
-
-        double cappedScore = Math.min(totalScore, 10.0);
-        accLog += String.format("  => Capped accident score for edge OSM ID %d: %.2f\n", osmId, cappedScore);
-        return 1.0 + cappedScore;
+        return 1.0 + Math.min(totalScore, 10.0);
     }
 
-    private double getAnxietyWeightMultiplier(EdgeIteratorState edgeState, long osmId, String accLog) {
+    private double getAnxietyWeightMultiplier(EdgeIteratorState edgeState, long osmId) {
         List<AnxietyData> segmentAnxieties = anxieties.get(osmId);
         if (segmentAnxieties == null || segmentAnxieties.isEmpty()) {
             return 1.0;
         }
 
         double totalScore = 0.0;
-        accLog += " has " + segmentAnxieties.size() + " anxiety zones. Details:\n";
         for(AnxietyData anx : segmentAnxieties) {
             double score = 0.0;
             if (this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue())) {
@@ -147,16 +139,9 @@ public class SafetyWeighting implements Weighting {
                 }
                 score += anx.severity * 0.5;
             }
-            accLog += String.format("  Anxiety Zone: isActive=%b, severity=%.2f, lighting=%b, impact=%.2f\n",
-                this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue()),
-                anx.severity, anx.lighting, score);
             totalScore += score;
         }
-        accLog += String.format("  => Total anxiety score for edge OSM ID %d: %.2f\n", osmId, totalScore);
-
-        double cappedScore = Math.min(totalScore, 10.0);
-        accLog += String.format("  => Capped accident score for edge OSM ID %d: %.2f\n", osmId, cappedScore);
-        return 1.0 + cappedScore;
+        return 1.0 + Math.min(totalScore, 10.0);
     }
 
     @Override
@@ -174,19 +159,25 @@ public class SafetyWeighting implements Weighting {
             return weight;
         }
 
-        String accLog = "Edge OSM ID: " + osmId;
-
+        String accLog = String.format("Edge OSM ID: %d, base weight(%.2f) * ", osmId, weight);
+        double newWeight = weight;
+        double accidentMultiplier = 1.0;
+        double anxietyMultiplier = 1.0;
         if (includeCrashes && accidents != null && reqTime != null) {
-            weight *= getAccidentWeightMultiplier(edgeState, osmId, accLog);
+            accidentMultiplier = getAccidentWeightMultiplier(edgeState, osmId);
         }
 
         if (includeAnxiety && anxieties != null && reqTime != null) {
-            weight *= getAnxietyWeightMultiplier(edgeState, osmId, accLog);
+            anxietyMultiplier = getAnxietyWeightMultiplier(edgeState, osmId);
         }
 
-        accLog += String.format("  Final weight: %.2f", weight);
-        LOGGER.info(accLog);
-        return weight;
+        newWeight *= accidentMultiplier * anxietyMultiplier;
+
+        accLog += String.format("accident multiplier (%.2f) * anxiety multiplier (%.2f) = final weight (%.2f)", accidentMultiplier, anxietyMultiplier, newWeight);
+        if ((includeCrashes || includeAnxiety) && weight != newWeight) {
+            LOGGER.info(accLog);
+        }
+        return newWeight;
     }
 
     @Override

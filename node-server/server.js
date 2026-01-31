@@ -279,8 +279,8 @@ app.post('/routing_customGH', async (req, res) => {
         params.append('instructions', true);
         params.append('include_crashes', include_crashes);
         params.append('include_anxiety', include_anxiety);
-        const date = LocalDateTime.now();
-        params.append('req_time', date.toString());
+        const date = new Date().toISOString().slice(0, -5);
+        params.append('req_time', date);
 
         const url = `http://graphhopper:8989/route?${params.toString()}`;
 
