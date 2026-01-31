@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 import java.time.LocalTime;
+import java.util.Arrays;
 
 public class AnxietyRegistry {
     private static final Logger LOGGER = Logger.getLogger(AnxietyRegistry.class.getName());
@@ -40,8 +41,8 @@ public class AnxietyRegistry {
                     AnxietyData data = new AnxietyData(
                         LocalTime.parse(rs.getString("start_time")),
                         LocalTime.parse(rs.getString("end_time")),
-                        (int[]) rs.getArray("active_days").getArray(),
-                        rs.getBoolean("lighting"),
+                        Arrays.stream((Integer[]) rs.getArray("active_days").getArray()).mapToInt(Integer::intValue).toArray(),
+                        rs.getInt("lighting"),
                         rs.getInt("likes"),
                         rs.getInt("severity")
                     );

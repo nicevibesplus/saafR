@@ -34,7 +34,8 @@
             body: JSON.stringify({
                 start: start,
                 end: end,
-                include_crashes: true
+                include_crashes: true,
+                include_anxiety: true
             })
         });
         return await response.json();

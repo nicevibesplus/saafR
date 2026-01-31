@@ -53,7 +53,12 @@ public class SafetyWeighting implements Weighting {
         LOGGER.info("SafetyWeighting hints: " + hints.toString());
         this.includeCrashes = hints.getBool("include_crashes", false);
         this.includeAnxiety = hints.getBool("include_anxiety", false);
-        this.reqTime = LocalDateTime.parse(hints.getString("req_time", null));
+        String reqTimeStr = hints.getString("req_time", null);
+        if (reqTimeStr == null) {
+            this.reqTime = null;
+        } else {
+            this.reqTime = LocalDateTime.parse(reqTimeStr);
+        }
 
         LOGGER.info("SafetyWeighting with hints: include_crashes=" + this.includeCrashes
             + ", include_anxiety=" + this.includeAnxiety
@@ -135,8 +140,10 @@ public class SafetyWeighting implements Weighting {
         for(AnxietyData anx : segmentAnxieties) {
             double score = 0.0;
             if (this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue())) {
-                if (!anx.lighting) {
+                if (anx.lighting == 1) {
                     score += 0.2;
+                } else if (anx.lighting == 2) {
+                    score += 0.1;
                 }
                 score += anx.severity * 0.5;
             }
@@ -169,12 +176,12 @@ public class SafetyWeighting implements Weighting {
 
         String accLog = "Edge OSM ID: " + osmId;
 
-        if (includeCrashes && accidents != null) {
-            weight = getAccidentWeightMultiplier(edgeState, osmId, accLog) * weight;
+        if (includeCrashes && accidents != null && reqTime != null) {
+            weight *= getAccidentWeightMultiplier(edgeState, osmId, accLog);
         }
 
-        if (includeAnxiety && anxieties != null) {
-            weight = getAnxietyWeightMultiplier(edgeState, osmId, accLog) * weight;
+        if (includeAnxiety && anxieties != null && reqTime != null) {
+            weight *= getAnxietyWeightMultiplier(edgeState, osmId, accLog);
         }
 
         accLog += String.format("  Final weight: %.2f", weight);
@@ -209,6 +216,6 @@ public class SafetyWeighting implements Weighting {
 
     @Override
     public String getName() {
-        return "safety"; // Eigener Name
+        return "bikesafe"; // Eigener Name
     }
 }
