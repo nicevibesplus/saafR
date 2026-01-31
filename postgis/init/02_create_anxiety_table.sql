@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS anxiety_areas (
     approved BOOLEAN DEFAULT FALSE,
     start_time TIME,
     end_time TIME,
-    geometry GEOMETRY,
+    geometry geometry(Geometry, 4326),
     active_days INTEGER[],         
     lighting INTEGER,          
     likes INTEGER DEFAULT 0,     

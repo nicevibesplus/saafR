@@ -32,7 +32,7 @@ public class AccidentRegistry {
         LOGGER.info("Starte Laden der Unfalldaten aus PostGIS...");
         try (Connection con = DriverManager.getConnection(url, user, pass)) {
             // Passe Tabellen- und Spaltennamen an deine DB an!
-            String query = "SELECT osm_id, crash_year, crash_month, crash_hour, crash_weekday FROM crash_road_match";
+            String query = "SELECT m.osm_id, c.ujahr AS crash_year, c.umonat AS crash_month, c.ustunde AS crash_hour, c.uwochentag AS crash_weekday FROM crash_road_match m JOIN crashes c on m.crash_id = c.ogc_fid";
 
             try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
                 int count = 0;
