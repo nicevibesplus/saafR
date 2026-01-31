@@ -41,8 +41,8 @@ VALUES
 ),
 (
     false,
-    '00:00:00',
-    '24:00:00',
+    NULL,
+    NULL,
     ST_SetSRID(
         ST_GeomFromGeoJSON(
             '{

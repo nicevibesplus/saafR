@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
@@ -36,7 +37,7 @@ public class SafetyWeighting implements Weighting {
     
     private final boolean includeCrashes;
     private final boolean includeAnxiety;
-    private final LocalDateTime reqTime;
+    private final LocalDateTime reqTimestamp;
 
     public SafetyWeighting(TurnCostProvider turnCostProvider, CustomWeighting.Parameters parameters, PMap hints, EncodingManager encodingManager) {
         this.delegate = new CustomWeighting(turnCostProvider, parameters);
@@ -50,20 +51,14 @@ public class SafetyWeighting implements Weighting {
         
         this.accidents = AccidentRegistry.getInstance(); 
         this.anxieties = AnxietyRegistry.getInstance();
-        LOGGER.info("SafetyWeighting hints: " + hints.toString());
         this.includeCrashes = hints.getBool("include_crashes", false);
         this.includeAnxiety = hints.getBool("include_anxiety", false);
         String reqTimeStr = hints.getString("req_time", null);
         if (reqTimeStr == null) {
-            this.reqTime = null;
+            this.reqTimestamp = null;
         } else {
-            this.reqTime = LocalDateTime.parse(reqTimeStr);
+            this.reqTimestamp = LocalDateTime.parse(reqTimeStr);
         }
-
-        LOGGER.info("SafetyWeighting with hints: include_crashes=" + this.includeCrashes
-            + ", include_anxiety=" + this.includeAnxiety
-            + ", req_time=" + this.reqTime
-        );
     }
 
     private double getAccidentWeightMultiplier(EdgeIteratorState edgeState, long osmId) {
@@ -76,16 +71,16 @@ public class SafetyWeighting implements Weighting {
 
         double totalScore = 0.0;
 
-        boolean reqIsWeekend = this.reqTime.getDayOfWeek().getValue() == 6 || this.reqTime.getDayOfWeek().getValue() == 7;
+        boolean reqIsWeekend = this.reqTimestamp.getDayOfWeek().getValue() == 6 || this.reqTimestamp.getDayOfWeek().getValue() == 7;
 
         for (AccidentData acc : segmentAccidents) {
             
             // year recency
-            int yearDiff = this.reqTime.getYear() - acc.year;
+            int yearDiff = this.reqTimestamp.getYear() - acc.year;
             double recencyFactor = 1.0 - (yearDiff * 0.1);
 
             // years season
-            int monthDiff = Math.abs(this.reqTime.getMonthValue() - acc.month);
+            int monthDiff = Math.abs(this.reqTimestamp.getMonthValue() - acc.month);
             monthDiff = Math.min(monthDiff, 12 - monthDiff);
             double seasonScore = 0.0;
             if (monthDiff == 0) {
@@ -97,7 +92,7 @@ public class SafetyWeighting implements Weighting {
             // day of week
             double dayScore = 0.0;
             boolean accIsWeekend = (acc.dayOfWeek == 6 || acc.dayOfWeek == 7);
-            if (this.reqTime.getDayOfWeek().getValue() == acc.dayOfWeek) {
+            if (this.reqTimestamp.getDayOfWeek().getValue() == acc.dayOfWeek) {
                 dayScore = 0.10;
             } else if (reqIsWeekend == accIsWeekend) {
                 dayScore = 0.04;
@@ -105,7 +100,7 @@ public class SafetyWeighting implements Weighting {
 
 
             // time
-            int hourDiff = Math.abs(this.reqTime.getHour() - acc.hour);
+            int hourDiff = Math.abs(this.reqTimestamp.getHour() - acc.hour);
             hourDiff = Math.min(hourDiff, 24 - hourDiff);
             double timeScore = 0.0;
             if (hourDiff == 0) {
@@ -127,17 +122,31 @@ public class SafetyWeighting implements Weighting {
         if (segmentAnxieties == null || segmentAnxieties.isEmpty()) {
             return 1.0;
         }
-
         double totalScore = 0.0;
         for(AnxietyData anx : segmentAnxieties) {
             double score = 0.0;
-            if (this.reqTime.toLocalTime().isAfter(anx.start_time) && this.reqTime.toLocalTime().isBefore(anx.end_time) && Arrays.asList(anx.active_days).contains(this.reqTime.getDayOfWeek().getValue())) {
-                if (anx.lighting == 1) {
-                    score += 0.2;
-                } else if (anx.lighting == 2) {
-                    score += 0.1;
+            boolean use = false;
+
+            if( anx.start_time == null && anx.end_time == null) {
+                use = true;
+            } else if( anx.start_time != null && anx.end_time != null) {
+                LocalTime reqTimeLocal = this.reqTimestamp.toLocalTime();
+                boolean crossesMidnight = anx.start_time.isAfter(anx.end_time);
+                boolean withinTime = !crossesMidnight && reqTimeLocal.isAfter(anx.start_time) && reqTimeLocal.isBefore(anx.end_time);
+                boolean withinTimeMidnight = crossesMidnight && (reqTimeLocal.isAfter(anx.start_time) || reqTimeLocal.isBefore(anx.end_time));
+                boolean activeDay = Arrays.asList(anx.active_days).contains(reqTimestamp.getDayOfWeek().getValue());
+                use = (withinTime || withinTimeMidnight) && activeDay;
+            }
+            
+            if (use) {
+                if (anx.likes >= 0) {
+                    if (anx.lighting == 1) {
+                        score += 0.2;
+                    } else if (anx.lighting == 2) {
+                        score += 0.1;
+                    }
+                    score += anx.severity;
                 }
-                score += anx.severity * 0.5;
             }
             totalScore += score;
         }
@@ -163,15 +172,15 @@ public class SafetyWeighting implements Weighting {
         double newWeight = weight;
         double accidentMultiplier = 1.0;
         double anxietyMultiplier = 1.0;
-        if (includeCrashes && accidents != null && reqTime != null) {
+        if (includeCrashes && accidents != null && reqTimestamp != null) {
             accidentMultiplier = getAccidentWeightMultiplier(edgeState, osmId);
         }
+        newWeight *= accidentMultiplier;
 
-        if (includeAnxiety && anxieties != null && reqTime != null) {
+        if (includeAnxiety && anxieties != null && reqTimestamp != null) {
             anxietyMultiplier = getAnxietyWeightMultiplier(edgeState, osmId);
         }
-
-        newWeight *= accidentMultiplier * anxietyMultiplier;
+        newWeight *= anxietyMultiplier;
 
         accLog += String.format("accident multiplier (%.2f) * anxiety multiplier (%.2f) = final weight (%.2f)", accidentMultiplier, anxietyMultiplier, newWeight);
         if ((includeCrashes || includeAnxiety) && weight != newWeight) {

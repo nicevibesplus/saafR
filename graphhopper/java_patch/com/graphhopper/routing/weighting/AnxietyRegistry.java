@@ -38,10 +38,14 @@ public class AnxietyRegistry {
                 int count = 0;
                 while (rs.next()) {
                     long osmId = rs.getLong("osm_id");
+                    String startTimeStr = rs.getString("start_time");
+                    String endTimeStr = rs.getString("end_time");
+                    int[] activeDays = Arrays.stream((Integer[]) rs.getArray("active_days").getArray()).mapToInt(Integer::intValue).toArray();
+                    boolean alwaysActive = (startTimeStr == null && endTimeStr == null && activeDays.length == 7);
                     AnxietyData data = new AnxietyData(
-                        LocalTime.parse(rs.getString("start_time")),
-                        LocalTime.parse(rs.getString("end_time")),
-                        Arrays.stream((Integer[]) rs.getArray("active_days").getArray()).mapToInt(Integer::intValue).toArray(),
+                        alwaysActive ? null : LocalTime.parse(startTimeStr),
+                        alwaysActive ? null : LocalTime.parse(endTimeStr),
+                        activeDays,
                         rs.getInt("lighting"),
                         rs.getInt("likes"),
                         rs.getInt("severity")
