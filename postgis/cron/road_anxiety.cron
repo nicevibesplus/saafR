@@ -1,1 +1,1 @@
-* * * * * export $(grep -v '^#' /proc/1/environ | tr '\0' '\n' | xargs) && /bin/bash /postgis/cron/road_anxiety.sh >> /var/log/cron.log 2>&1
+0 2 * * * export $(grep -v '^#' /proc/1/environ | tr '\0' '\n' | xargs) && /bin/bash /postgis/cron/road_anxiety.sh >> /var/log/cron.log 2>&1
