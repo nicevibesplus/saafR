@@ -13,8 +13,9 @@ echo "$(date) - Start Update"
 psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_SERVER:$POSTGRES_PORT/$POSTGRES_DB" \
      -f /docker-entrypoint-initdb.d/07_calc_road_anxiety_match.sql
 
-echo "$(date) - Done"
+echo "$(date) - Updating table finished."
 
-docker restart graphhopper
+echo "$(date)" > /shared/road_anxiety.done
 
-echo "$(date) - Graphhopper restarted"
+
+
