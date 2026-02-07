@@ -10,13 +10,16 @@ services:
       - ./start_data:/data:ro
       - pg_data:/var/lib/postgresql/data
       - shared:/shared
-
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM information_schema.tables WHERE table_name = 'crash_road_match'\" | grep -q 1 && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM crash_road_match LIMIT 1\" | grep -q 1" ]
       interval: 30s
       timeout: 10s
       start_period: 30s
       retries: 30
+    command: >
+      bash -c "declare -p | grep -E 'POSTGRES_' > /container.env 
+      && cron 
+      && docker-entrypoint.sh postgres"
 
   pgadmin:
     image: dpage/pgadmin4
