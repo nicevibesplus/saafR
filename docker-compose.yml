@@ -9,6 +9,8 @@ services:
       - ./postgis/init:/docker-entrypoint-initdb.d:ro
       - ./start_data:/data:ro
       - pg_data:/var/lib/postgresql/data
+      - shared:/shared
+
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM information_schema.tables WHERE table_name = 'crash_road_match'\" | grep -q 1 && psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc \"SELECT 1 FROM crash_road_match LIMIT 1\" | grep -q 1" ]
       interval: 30s
@@ -80,8 +82,36 @@ services:
     volumes:
       - ./start_data/data.osm.pbf:/graphhopper/data.osm.pbf
       - ./graphhopper/config.yml:/graphhopper/config.yml
+      - ./graphhopper/restart_graphhopper.cron:/etc/cron.d/restart_graphhopper:ro
+
+  restarter:
+    image: docker:cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - shared:/shared
+    command: |
+      sh -c '
+      [ -f /shared/road_anxiety.done ] && rm -f /shared/road_anxiety.done
+      echo "[$(date)] started, waiting for road_anxiety cron"
+      while true; do
+        while [ ! -f /shared/road_anxiety.done ]; do
+          sleep 10
+        done
+
+        echo "[$(date)] anxiety_zones_match calculated, restarting graphhopper container."
+        docker restart graphhopper
+
+        rm -f /shared/road_anxiety.done
+        echo "[$(date)] graphhopper container restarted."
+      done
+      '
+    restart: unless-stopped
+
+
+
 
 volumes:
   pg_data:
   geoserver_data:
   geoserver_ext:
+  shared:
