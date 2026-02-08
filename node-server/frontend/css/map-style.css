@@ -882,6 +882,7 @@ body.modal-open {
 
 .info-panel .card {
     pointer-events: auto;
+    border-radius: 25px;
 }
 
 @media (max-width: 768px) {
