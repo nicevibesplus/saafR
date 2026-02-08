@@ -21,7 +21,22 @@ body {
 /* === Navbar - Fixed Height === */
 .navbar {
     flex-shrink: 0; /* Don't compress navbar */
-    z-index: 1000; /* Keep navbar above map */
+    z-index: 1100; /* Keep navbar above map and FABs */
+}
+
+/* Navbar collapse as overlay on mobile */
+@media (max-width: 991.98px) {
+    .navbar .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #212529;
+        padding: 0.5rem 1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1100;
+        border-radius: 0 0 25px 25px;
+    }
 }
 
 /* === Content Area (Map Container) === */

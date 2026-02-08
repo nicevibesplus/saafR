@@ -46,13 +46,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" data-page="routingpage" href="#">Routing</a>
+                        <a class="nav-link active" data-page="routingpage" href="#"><i class="bi bi-sign-turn-right-fill me-2"></i>Routing</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-page="addpage" href="#">Adding</a>
+                        <a class="nav-link" data-page="addpage" href="#"><i class="bi bi-plus-circle-fill me-2"></i>Adding</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-page="aboutpage" href="#">About</a>
+                        <a class="nav-link" data-page="aboutpage" href="#"><i class="bi bi-info-circle-fill me-2"></i>About</a>
                     </li>
                 </ul>
             </div>
@@ -137,6 +137,16 @@
                 } else {
                     new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
                 }
+            }
+        });
+
+        // Close navbar when clicking outside (on map/content)
+        document.addEventListener("click", (event) => {
+            const navbar = document.querySelector(".navbar");
+            const navbarCollapse = document.getElementById("navbarNav");
+            if (navbarCollapse && navbarCollapse.classList.contains("show") && !navbar.contains(event.target)) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
             }
         });
 
