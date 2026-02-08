@@ -291,6 +291,14 @@ window.renderPage = async function () {
         window.saafr.ui.initMobileGuards();
     }
 
+    // Close info panel button
+    const closeInfoBtn = document.getElementById('closeInfoPanel');
+    if (closeInfoBtn) {
+        closeInfoBtn.addEventListener('click', function () {
+            document.getElementById('infoPanel').style.display = 'none';
+        });
+    }
+
     // Drawing functionality
     let isDrawing = false;
     let polygonPoints = [];

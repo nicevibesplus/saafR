@@ -158,18 +158,19 @@ and zooms to the calculated route
                 fillOpacity: 1
             }).addTo(store.map).bindPopup(`<strong>Start:</strong><br>${startLabel}`);
 
-            // Adding marker for end point
+            // Adding marker for end point with checkered flag pattern
             const targetLabel = endText || "Destination";
             if (store.route.endMarker) {
                 store.map.removeLayer(store.route.endMarker);
             }
-            store.route.endMarker = L.circleMarker([end.lat, end.lng], {
-                radius: 10,
-                color: '#666',
-                weight: 2,
-                fillColor: '#fff',
-                fillOpacity: 1
-            }).addTo(store.map).bindPopup(`<strong>Destination:</strong><br>${targetLabel}`);
+            var checkeredIcon = L.divIcon({
+                className: '',
+                html: '<div style="width:20px;height:20px;border-radius:50%;box-shadow:0 0 0 2px #666;background:conic-gradient(#000 90deg,#fff 90deg 180deg,#000 180deg 270deg,#fff 270deg) 0 0/66.66% 66.66%;"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            store.route.endMarker = L.marker([end.lat, end.lng], { icon: checkeredIcon })
+                .addTo(store.map).bindPopup(`<strong>Destination:</strong><br>${targetLabel}`);
 
             // Close routing bottom sheet
             if (window.saafr.closeRoutingSheet) {

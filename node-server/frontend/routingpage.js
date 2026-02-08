@@ -30,8 +30,20 @@ window.renderPage = async function () {
         routingBottomSheet.classList.add('open');
         routingSheetBackdrop.classList.add('open');
         if (bottomBarCenter) bottomBarCenter.classList.add('hidden');
-        if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden');
+        if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden', 'd-none');
         if (locationBtn) locationBtn.classList.add('hidden');
+
+        // Clear previous route and markers
+        var r = window.saafr.store.route;
+        var map = window.saafr.store.map;
+        ['layer', 'startMarker', 'endMarker', 'pickStartMarker', 'pickEndMarker'].forEach(function(k) {
+            if (r[k]) { map.removeLayer(r[k]); r[k] = null; }
+        });
+
+        // Pre-fill start with user location if available, otherwise clear
+        var loc = window.saafr.store.userLocation;
+        document.getElementById("startInput").value = loc ? loc.lat.toFixed(6) + "," + loc.lng.toFixed(6) : "";
+        document.getElementById("endInput").value = "";
     }
 
     function closeRoutingSheetFn() {
