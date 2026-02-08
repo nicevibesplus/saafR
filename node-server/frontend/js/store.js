@@ -21,8 +21,19 @@ window.saafr.store = {
 
     getMap: function () {
         if (!this.map) {
+            // Münster area bounds (with small buffer)
+            var muensterBounds = L.latLngBounds(
+                [51.8, 7.45],  // Southwest
+                [52.1, 7.80]   // Northeast
+            );
+
             this.map = L.map("map", {
-                zoomControl: false
+                zoomControl: false,
+                maxBounds: muensterBounds,
+                maxBoundsViscosity: 1.0,
+                minZoom: 10.5,
+                zoomSnap: 0.5,
+                zoomDelta: 0.5
             }).setView([51.9607, 7.6261], 13);
 
             L.control.zoom({

@@ -19,7 +19,19 @@ window.renderPage = async function () {
         drawnItems: new L.FeatureGroup()
     };
 
-    const map = L.map('map').setView([51.9607, 7.6261], 13); // Münster coordinates
+    // Münster area bounds
+    var muensterBounds = L.latLngBounds(
+        [51.8, 7.45],  // Southwest
+        [52.1, 7.80]   // Northeast
+    );
+
+    const map = L.map('map', {
+        maxBounds: muensterBounds,
+        maxBoundsViscosity: 1.0,
+        minZoom: 10.5,
+        zoomSnap: 0.5,
+        zoomDelta: 0.5
+    }).setView([51.9607, 7.6261], 13); // Münster coordinates
     window.addPageStore.map = map;
 
     // Add base layer

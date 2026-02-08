@@ -877,6 +877,11 @@ body.modal-open {
     right: 20px;
     z-index: 1000;
     max-width: 300px;
+    pointer-events: none;
+}
+
+.info-panel .card {
+    pointer-events: auto;
 }
 
 @media (max-width: 768px) {

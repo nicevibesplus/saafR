@@ -36,6 +36,8 @@ services:
     env_file: .env
     ports:
       - "3000:3000"
+    volumes:
+      - ./node-server/frontend:/app/frontend
 
   geoserver:
     image: docker.osgeo.org/geoserver:2.28.0
