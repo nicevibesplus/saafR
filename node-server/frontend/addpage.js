@@ -542,9 +542,6 @@ window.renderPage = async function () {
                 // Close modal first
                 bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
 
-                // Show success notification
-                showSavedNotification();
-
                 // Reload anxiety zones to show the new one
                 await loadAnxietyZones();
             } else {
@@ -555,34 +552,6 @@ window.renderPage = async function () {
             alert('Error saving data. Check console.');
         }
     });
-
-    function showSavedNotification() {
-        let toastEl = document.getElementById('toastdbsuccess');
-
-        // Create if doesn't exist
-        if (!toastEl) {
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = `
-        <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-            <div class="toast" id="toastdbsuccess">
-                <div class="toast-header">
-                    <strong class="me-auto">Success</strong>
-                    <small>Just now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    Zone saved successfully!
-                </div>
-            </div>
-        </div>
-    `;
-            document.body.appendChild(wrapper.firstElementChild);
-            toastEl = document.getElementById('toastdbsuccess');
-        }
-
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    }
 
 
     // Delete geometry and cancel button
