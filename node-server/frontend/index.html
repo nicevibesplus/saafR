@@ -23,6 +23,37 @@
 </head>
 
 <body>
+    <!-- Welcome Overlay (shown once on first visit) -->
+    <div id="welcomeOverlay" class="welcome-overlay d-none">
+        <div class="welcome-content">
+            <button type="button" class="welcome-close-btn" id="closeWelcomeBtn" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="welcome-header">
+                <h1>Welcome to</h1>
+                <img src="pictures/loading_saafR_logo.gif" alt="saafR Logo" class="welcome-logo">
+                <p class="welcome-tagline"><strong>S</strong>afe <strong>A</strong>ccident and <strong>A</strong>nxiety <strong>F</strong>ree <strong>R</strong>outing</p>
+            </div>
+            
+            <p class="welcome-intro">We developed this application to enable users to navigate safely through Münster by bicycle. Our app offers three main functions:</p>
+            
+            <div class="welcome-section">
+                <h5><i class="bi bi-sign-turn-right-fill me-2"></i>Routing</h5>
+                <p>Use the routing feature to find the safest bike routes in Münster. In the routing menu, you can choose whether you want to avoid accidents, anxiety zones, or both.</p>
+            </div>
+            
+            <div class="welcome-section">
+                <h5><i class="bi bi-plus-circle-fill me-2"></i>Adding Anxiety Zones</h5>
+                <p>On the "Adding" page, you can mark and edit areas where you feel unsafe while cycling.</p>
+            </div>
+            
+            <div class="welcome-section">
+                <h5><i class="bi bi-info-circle-fill me-2"></i>About</h5>
+                <p>Learn more about saafR, our team, and how the application works.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -153,6 +184,22 @@
 
         window.addEventListener("DOMContentLoaded", () => {
             loadPage("routingpage");
+
+            // Show welcome overlay only once (first visit)
+            const welcomeOverlay = document.getElementById("welcomeOverlay");
+            const closeWelcomeBtn = document.getElementById("closeWelcomeBtn");
+            
+            if (!localStorage.getItem("saafrWelcomeShown")) {
+                welcomeOverlay.classList.remove("d-none");
+            }
+
+            closeWelcomeBtn.addEventListener("click", () => {
+                welcomeOverlay.classList.add("fade-out");
+                setTimeout(() => {
+                    welcomeOverlay.classList.add("d-none");
+                    localStorage.setItem("saafrWelcomeShown", "true");
+                }, 300);
+            });
         });
     </script>
 
