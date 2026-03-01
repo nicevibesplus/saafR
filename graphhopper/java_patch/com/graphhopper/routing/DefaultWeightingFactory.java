@@ -1,5 +1,5 @@
 /*
- * Licensed to GraphHopper GmbH ... (Header wie oben)
+ * Licensed to GraphHopper GmbH ... 
  */
 
 package com.graphhopper.routing;
@@ -20,7 +20,7 @@ import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
 import com.graphhopper.util.TurnCostsConfig;
 
-// IMPORT FÜR DEINE KLASSE
+// import class
 import com.graphhopper.routing.weighting.SafetyWeighting;
 
 import static com.graphhopper.routing.weighting.TurnCostProvider.NO_TURN_COST_PROVIDER;
@@ -53,7 +53,6 @@ public class DefaultWeightingFactory implements WeightingFactory {
 
         Weighting weighting = null;
 
-        // 1. ORIGINALER BLOCK FÜR CUSTOM WEIGHTING
         if (CustomWeighting.NAME.equalsIgnoreCase(weightingStr)) {
             final CustomModel queryCustomModel = requestHints.getObject(CustomModel.KEY, null);
             final CustomModel mergedCustomModel = CustomModel.merge(profile.getCustomModel(), queryCustomModel);

@@ -95,15 +95,14 @@ window.renderPage = function () {
       </div>
     `;
 
-  // Enable vertical scrolling specifically for this page
   const contentElement = document.getElementById("content");
   contentElement.style.overflow = "auto";
   contentElement.style.height = "auto";
   contentElement.style.maxHeight = "none";
 };
 
+//function to reset style
 window.unmountPage = function () {
-  // Reset styles so they don't affect the map/routing page
   const contentElement = document.getElementById("content");
   if (contentElement) {
     contentElement.style.overflow = "";

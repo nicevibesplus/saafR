@@ -9,16 +9,14 @@ window.renderPage = async function () {
         content.innerHTML = html;
     } catch (error) {
         console.error(error);
-        return; // Stop execution if HTML fails to load
+        return; 
     }
 
     window.saafr.ui.initMobileGuards();
-
-    window.saafr.store.getMap(); // Stelle sicher, dass die Karte initialisiert ist
+    window.saafr.store.getMap(); 
     window.saafr.store.map.addLayer(window.saafr.store.getActiveBase());
     window.saafr.routing.initRoutingUI(window.saafr.store);
 
-    // Routing Bottom Sheet
     const openRoutingBtn = document.getElementById("openRoutingBtn");
     const routingBottomSheet = document.getElementById("routingBottomSheet");
     const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
@@ -33,14 +31,12 @@ window.renderPage = async function () {
         if (routeTimeDisplay) routeTimeDisplay.classList.add('hidden', 'd-none');
         if (locationBtn) locationBtn.classList.add('hidden');
 
-        // Clear previous route and markers
         var r = window.saafr.store.route;
         var map = window.saafr.store.map;
         ['layer', 'startMarker', 'endMarker', 'pickStartMarker', 'pickEndMarker'].forEach(function(k) {
             if (r[k]) { map.removeLayer(r[k]); r[k] = null; }
         });
 
-        // Pre-fill start with user location if available, otherwise clear
         var loc = window.saafr.store.userLocation;
         document.getElementById("startInput").value = loc ? loc.lat.toFixed(6) + "," + loc.lng.toFixed(6) : "";
         document.getElementById("endInput").value = "";
@@ -54,13 +50,11 @@ window.renderPage = async function () {
         if (locationBtn) locationBtn.classList.remove('hidden');
     }
 
-    // Store close function globally for use after routing
     window.saafr.closeRoutingSheet = closeRoutingSheetFn;
 
     if (openRoutingBtn) openRoutingBtn.addEventListener("click", openRoutingSheetFn);
     if (routingSheetBackdrop) routingSheetBackdrop.addEventListener("click", closeRoutingSheetFn);
 
-    // Layers Bottom Sheet
     const layersBtn = document.getElementById("layersBtn");
     const layersBottomSheet = document.getElementById("layersBottomSheet");
     const layersSheetBackdrop = document.getElementById("layersSheetBackdrop");
@@ -106,7 +100,6 @@ window.renderPage = async function () {
         mapTypeLight.classList.remove("active");
     });
 
-    // Accidents Toggle
     const accidentSwitch = document.getElementById("toggleAccidents");
     accidentSwitch.addEventListener("change", async function () {
         console.log("Accident layer toggle changed:", this.checked);
@@ -135,7 +128,6 @@ window.renderPage = async function () {
         }
     });
 
-    // Road Network Toggle
     const roadNetworkSwitch = document.getElementById("toggleRoadNetwork");
     roadNetworkSwitch.addEventListener("change", function () {
         if (window.saafr.store.isRoadNetworkLayerVisible()) {
@@ -149,7 +141,6 @@ window.renderPage = async function () {
 
     
 
-    // Location "Here I Am" button
     const locateMeBtn = document.getElementById("locateMeBtn");
     let locationMarker = null;
 
@@ -158,7 +149,6 @@ window.renderPage = async function () {
         const map = window.saafr.store.map;
         if (!map) return;
 
-        // Show loading state
         btn.classList.add("locating");
 
         if (!navigator.geolocation) {
@@ -172,10 +162,8 @@ window.renderPage = async function () {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // Remove previous location marker
                 if (locationMarker) map.removeLayer(locationMarker);
 
-                // Add location marker (blue dot like Google Maps)
                 locationMarker = L.circleMarker([lat, lng], {
                     radius: 8,
                     color: '#fff',
@@ -184,20 +172,16 @@ window.renderPage = async function () {
                     weight: 3
                 }).addTo(map);
 
-                // Zoom to location
                 map.setView([lat, lng], 16);
 
-                // Update start input in routing form
                 const startInput = document.getElementById("startInput");
                 if (startInput) {
                     startInput.value = `${lat.toFixed(6)},${lng.toFixed(6)}`;
                 }
 
-                // Update button state
                 btn.classList.remove("locating");
                 btn.classList.add("active");
 
-                // Store location reference
                 window.saafr.store.userLocation = { lat, lng };
             },
             function (error) {
@@ -227,7 +211,6 @@ window.renderPage = async function () {
     //window.saafr.map.initLayerToggles(window.saafr.store);
 };
 window.unmountPage = function () {
-    // 1. Close layers bottom sheet if open
     const layersBottomSheet = document.getElementById("layersBottomSheet");
     const layersSheetBackdrop = document.getElementById("layersSheetBackdrop");
     if (layersBottomSheet) {
@@ -237,7 +220,6 @@ window.unmountPage = function () {
         layersSheetBackdrop.classList.remove('open');
     }
 
-    // 2. Close routing bottom sheet if open
     const routingBottomSheet = document.getElementById("routingBottomSheet");
     const routingSheetBackdrop = document.getElementById("routingSheetBackdrop");
     if (routingBottomSheet) {
@@ -247,7 +229,6 @@ window.unmountPage = function () {
         routingSheetBackdrop.classList.remove('open');
     }
 
-    // 3. KARTE ENTFERNEN
     if (window.saafr && window.saafr.store && window.saafr.store.map) {
         window.saafr.store.map.remove(); // Zerstört die Leaflet-Instanz
         window.saafr.store.map = null;   // Setzt die Referenz im Store auf null

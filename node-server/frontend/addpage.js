@@ -10,7 +10,7 @@ window.renderPage = async function () {
         return;
     }
 
-    // Initialize the map
+    // Initialize map
     window.addPageStore = {
         map: null,
         anxietyLayer: null,
@@ -19,7 +19,6 @@ window.renderPage = async function () {
         drawnItems: new L.FeatureGroup()
     };
 
-    // Münster area bounds
     var muensterBounds = L.latLngBounds(
         [51.8, 7.45],  // Southwest
         [52.1, 7.80]   // Northeast
@@ -47,9 +46,9 @@ window.renderPage = async function () {
             if (window.addPageStore.anxietyLayer) {
                 map.removeLayer(window.addPageStore.anxietyLayer);
             }
-
+            
+            // anxiety zone styles
             const anxietyLayer = L.geoJSON(geojsonData, {
-                // Point-Features
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, {
                         radius: 6,
@@ -60,7 +59,6 @@ window.renderPage = async function () {
                         fillOpacity: 0.8
                     });
                 },
-                // Polygon- and LineString-Features
                 style: function (feature) {
                     return {
                         fillColor: "#ffc107",
@@ -85,34 +83,27 @@ window.renderPage = async function () {
         }
     }
 
-
-    // Load anxiety zones on page load
     loadAnxietyZones();
 
-
-
+    // function to show add popup
     function showAnxietyZonePopup(feature, layer) {
         const props = feature.properties
 
-        // Build trigger tags display
         let triggers = props.trigger_type || [];  // already an array
         let triggersHTML = triggers.map(t =>
             `<span class="badge bg-primary me-1 mb-1">${t.trim()}</span>`
         ).join('');
 
 
-        // Build active days display
         const days = props.active_days || [];
         const daysHTML = days.length === 7 ?
             '<span class="text-muted">All days</span>' :
             days.join(', ');
 
-        // Build time display
         const timeHTML = (!props.active_time_start && !props.active_time_end) ?
             '<span class="text-muted">All day</span>' :
             `${props.active_time_start || '00:00'} - ${props.active_time_end || '23:59'}`;
 
-        // Severity label
         const severityLabels = {
             1: 'Very Low',
             2: 'Low',
@@ -121,7 +112,6 @@ window.renderPage = async function () {
             5: 'Very High'
         };
 
-        // Lighting label
         const lightingLabels = {
             1: 'Poor',
             2: 'Moderate',
@@ -192,12 +182,9 @@ window.renderPage = async function () {
         }).openPopup();
     }
 
-
-    // Like/Dislike Handler
+    // liking logic
     window.increaseLikes = async function (zoneId, buttonElement) {
-        // Disable button during request
         buttonElement.disabled = true;
-
         try {
             const response = await fetch(`http://localhost:3000/increase_community_rating`, {
                 method: 'POST',
@@ -236,8 +223,8 @@ window.renderPage = async function () {
         }
     };
 
+    // disliking logic
     window.decreaseLikes = async function (zoneId, buttonElement, likeNumber) {
-        // Disable button during request
         buttonElement.disabled = true;
 
         try {
@@ -254,16 +241,13 @@ window.renderPage = async function () {
                 if (response.ok) {
                     const data = await response.json();
 
-                    // Update the display immediately
                     const likesDisplay = document.getElementById(`likesDisplay-${zoneId}`);
                     if (likesDisplay) {
                         likesDisplay.textContent = data.newLikes;
 
-                        // Update badge color
                         likesDisplay.className = `ms-2 badge ${data.newLikes >= 0 ? 'bg-success' : 'bg-danger'}`;
                     }
 
-                    // Visual feedback - briefly highlight the button
                     buttonElement.classList.add('active');
                     setTimeout(() => {
                         buttonElement.classList.remove('active');
@@ -277,7 +261,6 @@ window.renderPage = async function () {
                     buttonElement.disabled = false;
                 }
             }
-
         } catch (error) {
             console.error('Error updating likes:', error);
             alert('Network error. Please check your connection.');
@@ -285,13 +268,10 @@ window.renderPage = async function () {
         }
     };
 
-
-    // Initialize mobile guards
     if (window.saafr && window.saafr.ui && window.saafr.ui.initMobileGuards) {
         window.saafr.ui.initMobileGuards();
     }
 
-    // Close info panel button
     const closeInfoBtn = document.getElementById('closeInfoPanel');
     if (closeInfoBtn) {
         closeInfoBtn.addEventListener('click', function () {
@@ -299,27 +279,22 @@ window.renderPage = async function () {
         });
     }
 
-    // Drawing functionality
     let isDrawing = false;
     let polygonPoints = [];
     let tempPolygon = null;
 
-    // Point drawing button
     document.getElementById('drawPointBtn').addEventListener('click', function () {
         activateDrawingMode('point');
     });
 
-    // Polygon drawing button
     document.getElementById('drawPolygonBtn').addEventListener('click', function () {
         activateDrawingMode('polygon');
     });
 
-    // Cancel drawing button
     document.getElementById('cancelDrawBtn').addEventListener('click', function () {
         cancelDrawing();
     });
 
-    // Finish drawing button
     document.getElementById('finishDrawBtn').addEventListener('click', function () {
         if (window.addPageStore.drawingMode === 'polygon' && isDrawing && polygonPoints.length >= 3) {
             if (tempPolygon) {
@@ -340,11 +315,10 @@ window.renderPage = async function () {
         }
     });
 
+    // function for activating drawing mode 
     function activateDrawingMode(mode) {
         window.addPageStore.drawingMode = mode;
         document.getElementById('drawingControls').classList.remove('d-none');
-
-        // Update button states
         document.querySelectorAll('.draw-fab').forEach(btn => btn.classList.remove('active'));
         if (mode === 'point') {
             document.getElementById('drawPointBtn').classList.add('active');
@@ -357,6 +331,7 @@ window.renderPage = async function () {
         }
     }
 
+    // function for deactivating drawing mode 
     function cancelDrawing() {
         isDrawing = false;
         polygonPoints = [];
@@ -372,10 +347,9 @@ window.renderPage = async function () {
         document.querySelectorAll('.draw-fab').forEach(btn => btn.classList.remove('active'));
     }
 
-    // Map click handler for drawing
+    // create point 
     map.on('click', function (e) {
         if (window.addPageStore.drawingMode === 'point') {
-            // Draw point
             const customIcon = L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -388,10 +362,8 @@ window.renderPage = async function () {
             showDataInputModal('point', marker);
             cancelDrawing();
         } else if (window.addPageStore.drawingMode === 'polygon' && isDrawing) {
-            // Add point to polygon
             polygonPoints.push(e.latlng);
 
-            // Draw temporary polygon
             if (tempPolygon) {
                 map.removeLayer(tempPolygon);
             }
@@ -411,7 +383,6 @@ window.renderPage = async function () {
         }
     });
 
-    // Finish polygon drawing on double click
     map.on('dblclick', function (e) {
         if (window.addPageStore.drawingMode === 'polygon' && isDrawing && polygonPoints.length >= 3) {
             L.DomEvent.stop(e);
@@ -434,45 +405,39 @@ window.renderPage = async function () {
         }
     });
 
+    // function for input popup
     function showDataInputModal(geometryType, feature) {
         window.addPageStore.currentDrawing = feature;
 
         const modal = new bootstrap.Modal(document.getElementById('dataInputModal'));
 
-        // Clear form
         document.getElementById('dataForm').reset();
 
-        // Clear selected tags
         selectedTags.clear();
         document.querySelectorAll('.tag-btn').forEach(btn => btn.classList.remove('active'));
         updateSelectedTagsDisplay();
 
-        // Reset sliders to defaults
         document.getElementById('anxietySeverity').value = 3;
         document.getElementById('anxietySeverity').dispatchEvent(new Event('input'));
         document.getElementById('lighting').value = 2;
         document.getElementById('lighting').dispatchEvent(new Event('input'));
 
-        // Reset "Always Active" to default
         document.getElementById('alwaysActive').checked = true;
         document.getElementById('alwaysActive').dispatchEvent(new Event('change'));
 
         modal.show();
     }
 
-    // Save data button
     document.getElementById('saveDataBtn').addEventListener('click', async function () {
         const feature = window.addPageStore.currentDrawing;
         if (!feature) return;
 
-        // Validate form
         const form = document.getElementById('dataForm');
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
 
-        // Collect active days
         const activeDays = [];
         const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
         const alwaysActiveChecked = document.getElementById('alwaysActive').checked;
@@ -488,7 +453,6 @@ window.renderPage = async function () {
             });
         }
 
-        // Collect form data
         let trigger_type_string = document.getElementById('triggerType').value;
         let trigger_type_array = trigger_type_string.split(",");
         const formData = {
@@ -504,7 +468,6 @@ window.renderPage = async function () {
             geometry: null
         };
 
-        // Extract geometry
         if (feature instanceof L.Marker) {
             const latlng = feature.getLatLng();
             formData.geometry = {
@@ -515,7 +478,6 @@ window.renderPage = async function () {
             const latlngs = feature.getLatLngs()[0];
             const coords = latlngs.map(ll => [ll.lng, ll.lat]);
 
-            // GeoJSON Polygone is closed
             if (coords.length > 0 &&
                 (coords[0][0] !== coords[coords.length - 1][0] ||
                     coords[0][1] !== coords[coords.length - 1][1])) {
@@ -539,10 +501,8 @@ window.renderPage = async function () {
             });
 
             if (response.ok) {
-                // Close modal first
                 bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
 
-                // Reload anxiety zones to show the new one
                 await loadAnxietyZones();
             } else {
                 alert('Error saving data. Server returned: ' + response.status);
@@ -554,32 +514,23 @@ window.renderPage = async function () {
     });
 
 
-    // Delete geometry and cancel button
     document.getElementById('deleteGeometryBtn').addEventListener('click', function () {
         const feature = window.addPageStore.currentDrawing;
 
         if (feature) {
-            // Remove the drawn feature from the map
             window.addPageStore.drawnItems.removeLayer(feature);
-
-            // Clear reference
             window.addPageStore.currentDrawing = null;
         }
 
-        // Close modal
         bootstrap.Modal.getInstance(document.getElementById('dataInputModal')).hide();
     });
 
-
-
-    // "Always Active" checkbox handler
     document.getElementById('alwaysActive').addEventListener('change', function () {
         const dayCheckboxes = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
         const timeStart = document.getElementById('timeStart');
         const timeEnd = document.getElementById('timeEnd');
 
         if (this.checked) {
-            // Lock everything to "always active"
             dayCheckboxes.forEach(id => {
                 const checkbox = document.getElementById(id);
                 checkbox.checked = true;
@@ -590,22 +541,17 @@ window.renderPage = async function () {
             timeEnd.value = '';
             timeEnd.disabled = true;
         } else {
-            // Unlock for customization (keep values but enable editing)
             dayCheckboxes.forEach(id => {
                 const checkbox = document.getElementById(id);
                 checkbox.disabled = false;
-                // Keep checked state
             });
             timeStart.disabled = false;
             timeEnd.disabled = false;
-            // Values remain as "All day" but now editable
         }
     });
 
-    // Trigger on page load to set initial state
     document.getElementById('alwaysActive').dispatchEvent(new Event('change'));
 
-    // Severity slider value display
     document.getElementById('anxietySeverity').addEventListener('input', function () {
         const severityLabels = {
             1: '1 - Very Low',
@@ -617,7 +563,6 @@ window.renderPage = async function () {
         document.getElementById('severityValue').textContent = severityLabels[this.value];
     });
 
-    // Lighting slider value display
     document.getElementById('lighting').addEventListener('input', function () {
         const lightingLabels = {
             1: 'Poor',
@@ -627,7 +572,6 @@ window.renderPage = async function () {
         document.getElementById('lightingValue').textContent = lightingLabels[this.value];
     });
 
-    // Trigger Type Tag Selection System
     const selectedTags = new Set();
 
     function updateSelectedTagsDisplay() {
@@ -646,11 +590,9 @@ window.renderPage = async function () {
             container.appendChild(tagElement);
         });
 
-        // Update hidden input with comma-separated values
         hiddenInput.value = Array.from(selectedTags).join(',');
     }
 
-    // Predefined tag button clicks
     document.querySelectorAll('.tag-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const tag = this.dataset.tag;
@@ -667,7 +609,6 @@ window.renderPage = async function () {
         });
     });
 
-    // Remove tag from selected display
     document.getElementById('selectedTags').addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-tag')) {
             const tag = e.target.dataset.tag;
@@ -684,7 +625,6 @@ window.renderPage = async function () {
         }
     });
 
-    // Custom tag addition
     document.getElementById('addCustomTagBtn').addEventListener('click', function () {
         const input = document.getElementById('customTagInput');
         const customTag = input.value.trim();
@@ -696,7 +636,6 @@ window.renderPage = async function () {
         }
     });
 
-    // Allow Enter key to add custom tag
     document.getElementById('customTagInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -711,7 +650,6 @@ window.renderPage = async function () {
     let isDarkMode = false;
     darkModeSwitch.addEventListener("click", function () {
         isDarkMode = !isDarkMode;
-        // Simple toggle - you can enhance this with your actual dark mode logic
         if (isDarkMode) {
             this.querySelector('i').classList.replace('bi-moon-fill', 'bi-sun-fill');
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -732,7 +670,6 @@ window.renderPage = async function () {
 };
 
 window.unmountPage = function () {
-    // Close any open modals
     const dataInputModalEl = document.getElementById("dataInputModal");
     if (dataInputModalEl) {
         const inst = bootstrap.Modal.getInstance(dataInputModalEl);
@@ -742,12 +679,10 @@ window.unmountPage = function () {
         }
     }
 
-    // Remove modal backdrops
     document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
     document.body.classList.remove("modal-open");
     document.body.style.removeProperty("padding-right");
 
-    // Clean up map
     if (window.addPageStore && window.addPageStore.map) {
         window.addPageStore.map.remove();
         window.addPageStore.map = null;
